@@ -865,7 +865,10 @@ edges { node {${f}} }
 
   let queryString = `query {`;
   Object.entries(query).forEach(([key, value]) => {
-    queryString = queryString + `${key}: ${value}\n`;
+    queryString =
+      queryString +
+      `${key}: ${value}
+`;
   });
   queryString = queryString + `}`;
 

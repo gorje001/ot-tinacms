@@ -6457,6 +6457,7 @@ __metadata:
     "@graphql-codegen/visitor-plugin-common": ^2.4.0
     "@graphql-tools/graphql-file-loader": ^7.2.0
     "@graphql-tools/load": ^7.3.2
+    "@tinacms/client": "workspace:*"
     "@tinacms/datalayer": "workspace:*"
     "@tinacms/graphql": "workspace:*"
     "@tinacms/metrics": "workspace:*"
@@ -6508,6 +6509,29 @@ __metadata:
     yarn: ^1.22.17
     yup: ^0.32.9
     zod: ^3.14.4
+  bin:
+    tinacms: bin/tinacms
+  languageName: unknown
+  linkType: soft
+
+"@tinacms/client@workspace:*, @tinacms/client@workspace:packages/@tinacms/client":
+  version: 0.0.0-use.local
+  resolution: "@tinacms/client@workspace:packages/@tinacms/client"
+  dependencies:
+    "@tinacms/graphql": "workspace:*"
+    "@tinacms/schema-tools": "workspace:*"
+    "@tinacms/scripts": "workspace:*"
+    "@types/figlet": 1.2.0
+    "@types/fs-extra": ^9.0.11
+    "@types/inquirer": ^6.5.0
+    "@types/jest": 26.0.4
+    fs-extra: ^10.1.0
+    graphql: ^15.1.0
+    isomorphic-fetch: ^3.0.0
+    jest: ^27.0.6
+    jest-file-snapshot: ^0.5.0
+    prettier: ^2.6.2
+    typescript: ^4.3.5
   bin:
     tinacms: bin/tinacms
   languageName: unknown
@@ -17988,6 +18012,17 @@ __metadata:
     jsonfile: ^6.0.1
     universalify: ^2.0.0
   checksum: 84632d143fe3125b8c3c2b1fedbbdfcfb84fc3e087522b4e138cc07edf574619925713a6609f6d5e53ede2e31ab319c7d528ea4a4a770ba6622a16bf4447cd8b
+  languageName: node
+  linkType: hard
+
+"fs-extra@npm:^10.1.0":
+  version: 10.1.0
+  resolution: "fs-extra@npm:10.1.0"
+  dependencies:
+    graceful-fs: ^4.2.0
+    jsonfile: ^6.0.1
+    universalify: ^2.0.0
+  checksum: ea286a767c6e1cbfbb0bd48729b8e5e1734d919bf948ec13c1bde18a451ecf4ab9bd65475a031953032a6d740b3e5f48a945e89d5da536ad9876f7c349c9a2a4
   languageName: node
   linkType: hard
 
