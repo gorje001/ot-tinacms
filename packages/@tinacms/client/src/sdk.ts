@@ -175,13 +175,20 @@ edges { node {${f}} }
     body: JSON.stringify({
       query: queryString,
     }),
-  }).then(async (res) => {
-    const json = await res.json()
-    return {
-      query: queryString,
-      ...json,
-    }
   })
+    .then(async (res) => {
+      const json = await res.json()
+      return {
+        query: queryString,
+        ...json,
+      }
+    })
+    .catch(async (e) => {
+      return {
+        query: queryString,
+        errors: e.message,
+      }
+    })
 }
 
 export type AsyncReturnType<T extends (...args: any) => Promise<any>> =

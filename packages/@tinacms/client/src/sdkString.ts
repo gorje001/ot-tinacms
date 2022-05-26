@@ -8,6 +8,24 @@ const generateNamespacedFieldName = (names: string[], suffix: string = '') => {
   return (suffix ? [...names, suffix] : names).map(capitalize).join('')
 }
 
+const systemFragment = \`fragment SystemInfo on Document {
+  id
+  _sys {
+    filename
+    basename
+    breadcrumbs
+    path
+    relativePath
+    extension
+    template
+    collection {
+      name
+      format
+    }
+  }
+  __typename
+}\`
+
 export const query = <
   B,
   A extends keyof Collection,
@@ -44,7 +62,7 @@ export const query = <
             )
             if (options.include[field.name] === true) {
               return \`\${field.name} {
-                __typename
+                ...SystemInfo
                 \${referencedCollections.map((collection: any) => {
                   const f = addFields(collection.fields, options)
                   return \`...on \${generateNamespacedFieldName(
@@ -74,7 +92,7 @@ export const query = <
             }\`
           }
         }
-        return \`\${field.name} { __typename
+        return \`\${field.name} {
         ...on Document {
           id
         }
@@ -121,6 +139,7 @@ export const query = <
     }
     const f = addFields(collection.fields, args)
     return \`\${docName(collection.name, args.relativePath)} {
+...SystemInfo
 \${f}
 }\`
   }
@@ -133,7 +152,10 @@ export const query = <
     }
     const f = addFields(collection.fields, args)
     return \`\${docName(collection.name, args.relativePath, true)} {
-edges { node {\${f}} }
+edges { node {
+  ...SystemInfo
+  \${f}
+} }
 }\`
   }
 
@@ -149,11 +171,13 @@ edges { node {\${f}} }
   // @ts-ignore
   const query = callback(cb)
 
-  let queryString = \`query {\`
+  let queryString = \`
+query {\`
   Object.entries(query).forEach(([key, value]) => {
     queryString = queryString + \`\${key}: \${value}\n\`
   })
   queryString = queryString + \`}\`
+  queryString = queryString + \`\${systemFragment}\`
 
   return fetch('http://localhost:4001/graphql', {
     method: 'POST',
@@ -168,6 +192,12 @@ edges { node {\${f}} }
     return {
       query: queryString,
       ...json,
+    }
+  })
+  .catch(async (e) => {
+    return {
+      query: queryString,
+      errors: e.message,
     }
   })
 }

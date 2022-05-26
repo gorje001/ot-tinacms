@@ -17,104 +17,6 @@ import { TinaSchema } from '@tinacms/schema-tools'
 import { sdkString } from './sdkString'
 import { buildTypes2 } from './types'
 
-const buildScalar = (
-  field: Exclude<
-    TinaField,
-    { type: 'rich-text' } | { type: 'reference' } | { type: 'object' }
-  >,
-  type?: string
-) => {
-  let s = type || `string`
-  if (field.options) {
-    const values = []
-    field.options.map((option) => {
-      if (typeof option === 'string') {
-        values.push(`"${option}"`)
-      } else {
-        values.push(`"${option.value}"`)
-      }
-    })
-    s = `${values.join(' | ')}`
-  }
-  let o = ''
-  if (!field.required) {
-    o = '?'
-  }
-  if (field.list) {
-    return `${field.name}${o}: ${s}[]`
-  }
-  return `${field.name}${o}: ${s}`
-}
-const buildField = (field: TinaField) => {
-  switch (field.type) {
-    case 'boolean':
-    case 'datetime':
-    case 'image':
-    case 'number':
-    case 'rich-text':
-    case 'reference':
-    case 'string':
-      // @ts-ignore doesn't like rich-text and reference in here
-      return buildScalar(field)
-    case 'object':
-      if (field.templates) {
-        const u = `${field.templates
-          .map((template) => {
-            if (typeof template === 'string') {
-              throw new Error('Global templates not supported')
-            }
-            return `${buildFields(
-              { required: true },
-              template.fields,
-              `_template: "${template.name}"`
-            )}`
-          })
-          .join(' | ')}`
-
-        let res = u
-        if (field.list) {
-          res = `${res}[]`
-        }
-        let o = ''
-        if (!field.required) {
-          o = '?'
-        }
-        return `${field.name}${o}: ${res}`
-      } else {
-        if (typeof field.fields === 'string') {
-          throw new Error('Global templates not supported')
-        }
-        let o = ''
-        if (!field.required) {
-          o = '?'
-        }
-
-        return `${field.name}${o}: ${buildFields(field, field.fields)}`
-      }
-    default:
-      break
-  }
-}
-
-const buildFields = (
-  field: { list?: boolean; required?: boolean },
-  fields: TinaField[],
-  extra?: string
-) => {
-  const fieldStrings = []
-  fields.forEach((field) => {
-    fieldStrings.push(buildField(field))
-  })
-  if (extra) {
-    fieldStrings.push(extra)
-  }
-  let string = `{${fieldStrings.join(',\n')}}`
-  if (field.list) {
-    string = `${string}[]`
-  }
-  return string
-}
-
 export const createClient = async (ctx: any) => {
   const schemaImportStatement = `import schema from "./__generated__/_schema.json"`
   return createClientInner(ctx, schemaImportStatement)
@@ -123,17 +25,10 @@ export const createClientInner = async (
   ctx: { tinaSchema: TinaSchema },
   schemaImportStatement
 ) => {
-  const names = []
-  const s2 = []
-  ctx.tinaSchema.getCollections().map((collection) => {
-    names.push(collection.name)
-    s2.push(buildTypes2(collection))
-  })
-
   const types = await buildTypes(ctx.tinaSchema)
   const res = prettier.format(
-    `${schemaImportStatement}
-${s2.join('\n')}
+    `/* eslint-disable */
+${schemaImportStatement}
 ${types}
 `,
     { parser: 'typescript' }
@@ -169,40 +64,34 @@ const buildFieldType = (field: TinaField) => {
   }
 }
 
-const buildTypes = (tinaSchema: TinaSchema) => {
-  const collections = []
-  const collectionTypes = []
-  const collectionNames = []
-  tinaSchema.getCollections().map((collection) => {
-    collectionNames.push(collection.name)
-    collectionTypes.push(
-      `type ${collection.name}Fields = { ${collection.fields
-        .map((f) => `${f.name}?: ${buildFieldType(f)}`)
-        .join(', ')}}`
-    )
-    collectionTypes.push(
-      `type ${collection.name}References = { ${collection.fields
-        .filter((f) => f.type === 'reference')
-        .map(
-          (f) =>
-            // @ts-ignore
-            `${f.name}?: boolean | {${f.collections
-              .map(
-                (col) =>
-                  `${col}: {fields?: ${col}Fields, include?: ${col}References}`
-              )
-              .join(', ')}}`
-        )
-        .join(', ')}}`
-    )
-    collectionTypes.push(
-      `type ${collection.name}Options= {
-        fields?: ${collection.name}Fields;
-        include?: ${collection.name}References;
-      }`
-    )
-    collectionTypes.push(`
-    type ${collection.name}Return<
+const buildFieldTypeStatement = (field) =>
+  `${field.name}?: ${buildFieldType(field)}`
+
+const buildReferenceTypeStatement = (f) => {
+  return `${f.name}?: boolean | {${f.collections
+    .map((col) => `${col}: {fields?: ${col}Fields, include?: ${col}References}`)
+    .join(', ')}
+  }`
+}
+
+const buildCollectionTypes = (collection) => {
+  return `
+${buildTypes2(collection)}
+type ${collection.name}Fields = { ${collection.fields
+    .map(buildFieldTypeStatement)
+    .join(', ')} }
+
+type ${collection.name}References = { ${collection.fields
+    .filter((f) => f.type === 'reference')
+    .map(buildReferenceTypeStatement)
+    .join(', ')}}
+
+type ${collection.name}Options= {
+  fields?: ${collection.name}Fields;
+  include?: ${collection.name}References;
+}
+
+type ${collection.name}Return<
   T extends ${collection.name}Fields | undefined,
   B extends ${collection.name}References
 > = T extends object
@@ -214,53 +103,58 @@ const buildTypes = (tinaSchema: TinaSchema) => {
         : never;
     }
   : ${collection.name}Type<B>;
-    `)
-    collections.push(`
-    function ${collection.name}<
-    T extends ${collection.name}Fields | undefined,
-    B extends ${collection.name}References
-  >(args: { relativePath: string; fields?: never; include?: B }): ${collection.name}Type<B>;
-  function ${collection.name}<
-    T extends ${collection.name}Fields | undefined,
-    B extends ${collection.name}References
-  >(args: {
-    relativePath: string;
-    fields?: T;
-    include?: never;
-  }): {
-    [Key in keyof T]: T[Key] extends true
-      ? Key extends keyof ${collection.name}Type
-        ? ${collection.name}Type[Key]
-        : never
-      : never;
-  };
-  function ${collection.name}<T extends ${collection.name}Fields | undefined, B extends ${collection.name}References>(
-    args:
-      | {
-          relativePath: string;
-          fields?: T;
-          include?: never;
-        }
-      | {
-          relativePath: string;
-          fields?: never;
-          include?: B;
-        }
-  ):
-    | ${collection.name}Type<B>
-    | {
-        [Key in keyof T]: T[Key] extends true
-          ? Key extends keyof ${collection.name}Type
-            ? ${collection.name}Type[Key]
-            : never
-          : never;
-      } {
-    return {} as any;
-  }
-  function ${collection.name}Connection<
+
+function ${collection.name}<
   T extends ${collection.name}Fields | undefined,
   B extends ${collection.name}References
->(args: { first: string; fields?: never; include?: B }): {edges: {node: ${collection.name}Type<B>}[]};
+>(args: { relativePath: string; fields?: never; include?: B }): ${
+    collection.name
+  }Type<B>;
+function ${collection.name}<
+  T extends ${collection.name}Fields | undefined,
+  B extends ${collection.name}References
+>(args: {
+  relativePath: string;
+  fields?: T;
+  include?: never;
+}): {
+  [Key in keyof T]: T[Key] extends true
+    ? Key extends keyof ${collection.name}Type
+      ? ${collection.name}Type[Key]
+      : never
+    : never;
+};
+function ${collection.name}<T extends ${
+    collection.name
+  }Fields | undefined, B extends ${collection.name}References>(
+  args:
+    | {
+        relativePath: string;
+        fields?: T;
+        include?: never;
+      }
+    | {
+        relativePath: string;
+        fields?: never;
+        include?: B;
+      }
+):
+  | ${collection.name}Type<B>
+  | {
+      [Key in keyof T]: T[Key] extends true
+        ? Key extends keyof ${collection.name}Type
+          ? ${collection.name}Type[Key]
+          : never
+        : never;
+    } {
+  return {} as any;
+}
+function ${collection.name}Connection<
+  T extends ${collection.name}Fields | undefined,
+  B extends ${collection.name}References
+>(args: { first: string; fields?: never; include?: B }): {edges: {node: ${
+    collection.name
+  }Type<B>}[]};
 function ${collection.name}Connection<
   T extends ${collection.name}Fields | undefined,
   B extends ${collection.name}References
@@ -277,7 +171,9 @@ function ${collection.name}Connection<
     : never}
   }[]
 };
-function ${collection.name}Connection<T extends ${collection.name}Fields | undefined, B extends ${collection.name}References>(
+function ${collection.name}Connection<T extends ${
+    collection.name
+  }Fields | undefined, B extends ${collection.name}References>(
   args:
     | {
         first: string;
@@ -303,17 +199,22 @@ function ${collection.name}Connection<T extends ${collection.name}Fields | undef
   }[]
 } {
   return {} as any;
+}`
 }
-    `)
+
+const buildTypes = (tinaSchema: TinaSchema) => {
+  const collections = tinaSchema.getCollections()
+  const collectionTypes = []
+  tinaSchema.getCollections().map((collection) => {
+    collectionTypes.push(buildCollectionTypes(collection))
   })
   const s = `
   ${collectionTypes.join('\n')}
-  ${collections.join('\n\n')}
 
   type Collection = {
-    ${collectionNames.map((c) => `${c}: typeof ${c}`).join(',\n')}
-    ${collectionNames
-      .map((c) => `${c}Connection: typeof ${c}Connection`)
+    ${collections.map((c) => `${c.name}: typeof ${c.name}`).join(',\n')}
+    ${collections
+      .map((c) => `${c.name}Connection: typeof ${c.name}Connection`)
       .join(',\n')}
   }
 
