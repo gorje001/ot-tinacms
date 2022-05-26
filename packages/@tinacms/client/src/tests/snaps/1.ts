@@ -1,16 +1,51 @@
+/* eslint-disable */
 const schema = {
   collections: [
-    { name: 'post', path: '', fields: [{ name: 'title', type: 'string' }] },
+    {
+      name: 'post',
+      path: '',
+      fields: [
+        { name: 'title', type: 'string', namespace: ['post', 'title'] },
+        {
+          name: 'author',
+          type: 'reference',
+          collections: ['author'],
+          namespace: ['post', 'author'],
+        },
+      ],
+      namespace: ['post'],
+    },
+    {
+      name: 'author',
+      path: '',
+      fields: [{ name: 'name', type: 'string', namespace: ['author', 'name'] }],
+      namespace: ['author'],
+    },
   ],
+  namespace: [],
 }
+
 type postType<R extends postReferences = {}> = {
   title?: string
+  author?: R['author'] extends true
+    ? authorType
+    : R['author'] extends { author: authorOptions }
+    ? authorReturn<
+        R['author']['author']['fields'],
+        R['author']['author']['include']
+      >
+    : { id: string }
   _collection: 'post'
   _template: 'post'
 }
+type postFields = { title?: true; author?: boolean }
 
-type postFields = { title?: true }
-type postReferences = {}
+type postReferences = {
+  author?:
+    | boolean
+    | { author: { fields?: authorFields; include?: authorReferences } }
+}
+
 type postOptions = {
   fields?: postFields
   include?: postReferences
@@ -127,9 +162,136 @@ function postConnection<
   return {} as any
 }
 
+type authorType<R extends authorReferences = {}> = {
+  name?: string
+  _collection: 'author'
+  _template: 'author'
+}
+type authorFields = { name?: true }
+
+type authorReferences = {}
+
+type authorOptions = {
+  fields?: authorFields
+  include?: authorReferences
+}
+
+type authorReturn<
+  T extends authorFields | undefined,
+  B extends authorReferences
+> = T extends object
+  ? {
+      [Key in keyof T]: T[Key] extends true
+        ? Key extends keyof authorType
+          ? authorType[Key]
+          : never
+        : never
+    }
+  : authorType<B>
+
+function author<
+  T extends authorFields | undefined,
+  B extends authorReferences
+>(args: { relativePath: string; fields?: never; include?: B }): authorType<B>
+function author<
+  T extends authorFields | undefined,
+  B extends authorReferences
+>(args: {
+  relativePath: string
+  fields?: T
+  include?: never
+}): {
+  [Key in keyof T]: T[Key] extends true
+    ? Key extends keyof authorType
+      ? authorType[Key]
+      : never
+    : never
+}
+function author<T extends authorFields | undefined, B extends authorReferences>(
+  args:
+    | {
+        relativePath: string
+        fields?: T
+        include?: never
+      }
+    | {
+        relativePath: string
+        fields?: never
+        include?: B
+      }
+):
+  | authorType<B>
+  | {
+      [Key in keyof T]: T[Key] extends true
+        ? Key extends keyof authorType
+          ? authorType[Key]
+          : never
+        : never
+    } {
+  return {} as any
+}
+function authorConnection<
+  T extends authorFields | undefined,
+  B extends authorReferences
+>(args: {
+  first: string
+  fields?: never
+  include?: B
+}): { edges: { node: authorType<B> }[] }
+function authorConnection<
+  T extends authorFields | undefined,
+  B extends authorReferences
+>(args: {
+  first: string
+  fields?: T
+  include?: never
+}): {
+  edges: {
+    node: {
+      [Key in keyof T]: T[Key] extends true
+        ? Key extends keyof authorType
+          ? authorType[Key]
+          : never
+        : never
+    }
+  }[]
+}
+function authorConnection<
+  T extends authorFields | undefined,
+  B extends authorReferences
+>(
+  args:
+    | {
+        first: string
+        fields?: T
+        include?: never
+      }
+    | {
+        first: string
+        fields?: never
+        include?: B
+      }
+): {
+  edges: {
+    node:
+      | authorType<B>
+      | {
+          [Key in keyof T]: T[Key] extends true
+            ? Key extends keyof authorType
+              ? authorType[Key]
+              : never
+            : never
+        }
+  }[]
+} {
+  return {} as any
+}
+
 type Collection = {
   post: typeof post
+  author: typeof author
   postConnection: typeof postConnection
+  authorConnection: typeof authorConnection
 }
 
 const capitalize = (s: string) => {
@@ -140,6 +302,24 @@ const capitalize = (s: string) => {
 const generateNamespacedFieldName = (names: string[], suffix: string = '') => {
   return (suffix ? [...names, suffix] : names).map(capitalize).join('')
 }
+
+const systemFragment = `fragment SystemInfo on Document {
+  id
+  _sys {
+    filename
+    basename
+    breadcrumbs
+    path
+    relativePath
+    extension
+    template
+    collection {
+      name
+      format
+    }
+  }
+  __typename
+}`
 
 export const query = <
   B,
@@ -177,7 +357,7 @@ export const query = <
             )
             if (options.include[field.name] === true) {
               return `${field.name} {
-                __typename
+                ...SystemInfo
                 ${referencedCollections.map((collection: any) => {
                   const f = addFields(collection.fields, options)
                   return `...on ${generateNamespacedFieldName(
@@ -207,7 +387,7 @@ export const query = <
             }`
           }
         }
-        return `${field.name} { __typename
+        return `${field.name} {
         ...on Document {
           id
         }
@@ -254,6 +434,7 @@ export const query = <
     }
     const f = addFields(collection.fields, args)
     return `${docName(collection.name, args.relativePath)} {
+...SystemInfo
 ${f}
 }`
   }
@@ -266,7 +447,10 @@ ${f}
     }
     const f = addFields(collection.fields, args)
     return `${docName(collection.name, args.relativePath, true)} {
-edges { node {${f}} }
+edges { node {
+  ...SystemInfo
+  ${f}
+} }
 }`
   }
 
@@ -282,7 +466,8 @@ edges { node {${f}} }
   // @ts-ignore
   const query = callback(cb)
 
-  let queryString = `query {`
+  let queryString = `
+query {`
   Object.entries(query).forEach(([key, value]) => {
     queryString =
       queryString +
@@ -290,6 +475,7 @@ edges { node {${f}} }
 `
   })
   queryString = queryString + `}`
+  queryString = queryString + `${systemFragment}`
 
   return fetch('http://localhost:4001/graphql', {
     method: 'POST',
@@ -299,13 +485,20 @@ edges { node {${f}} }
     body: JSON.stringify({
       query: queryString,
     }),
-  }).then(async (res) => {
-    const json = await res.json()
-    return {
-      query: queryString,
-      ...json,
-    }
   })
+    .then(async (res) => {
+      const json = await res.json()
+      return {
+        query: queryString,
+        ...json,
+      }
+    })
+    .catch(async (e) => {
+      return {
+        query: queryString,
+        errors: e.message,
+      }
+    })
 }
 
 export type AsyncReturnType<T extends (...args: any) => Promise<any>> =
