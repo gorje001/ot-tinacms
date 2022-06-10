@@ -60,7 +60,6 @@ export const getStaticProps = async ({ params }) => {
     props: await query((c) => ({
       global: c.global({ relativePath: "index.json" }),
       pages: c.pages({ relativePath: `${params.filename}.md` }),
-      post: c.posts({ relativePath: "anotherPost.mdx" }),
     })),
   };
 };

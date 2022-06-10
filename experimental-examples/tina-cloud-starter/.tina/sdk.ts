@@ -1,4 +1,6 @@
+/* eslint-disable */
 import schema from "./__generated__/_schema.json";
+
 type postsType<R extends postsReferences = {}> = {
   title?: string;
   heroImg?: string;
@@ -16,187 +18,6 @@ type postsType<R extends postsReferences = {}> = {
   _collection: "posts";
   _template: "posts";
 };
-type globalType<R extends globalReferences = {}> = {
-  header?: {
-    icon?: {
-      color?:
-        | "primary"
-        | "blue"
-        | "teal"
-        | "green"
-        | "red"
-        | "pink"
-        | "purple"
-        | "orange"
-        | "yellow";
-      style?: "circle" | "float";
-      name?:
-        | ""
-        | "aperture"
-        | "code"
-        | "like"
-        | "map"
-        | "palette"
-        | "chart"
-        | "pin"
-        | "shield"
-        | "settings"
-        | "store"
-        | "ball"
-        | "tube"
-        | "trophy"
-        | "user"
-        | "beer"
-        | "chat"
-        | "cloud"
-        | "coffee"
-        | "world"
-        | "tina";
-      _collection: "icon";
-      _template: "icon";
-    };
-    color?: "default" | "primary";
-    nav?: {
-      href?: string;
-      label?: string;
-      _collection: "nav";
-      _template: "nav";
-    }[];
-    _collection: "header";
-    _template: "header";
-  };
-  footer?: {
-    color?: "default" | "primary";
-    social?: {
-      facebook?: string;
-      twitter?: string;
-      instagram?: string;
-      github?: string;
-      _collection: "social";
-      _template: "social";
-    };
-    _collection: "footer";
-    _template: "footer";
-  };
-  theme?: {
-    color?:
-      | "blue"
-      | "teal"
-      | "green"
-      | "red"
-      | "pink"
-      | "purple"
-      | "orange"
-      | "yellow";
-    font?: "sans" | "nunito" | "lato";
-    icon?: "boxicon" | "heroicon";
-    darkMode?: "system" | "light" | "dark";
-    _collection: "theme";
-    _template: "theme";
-  };
-  _collection: "global";
-  _template: "global";
-};
-type authorsType<R extends authorsReferences = {}> = {
-  name?: string;
-  avatar?: string;
-  favoritePost?: R["favoritePost"] extends true
-    ? postsType
-    : R["favoritePost"] extends { posts: postsOptions }
-    ? postsReturn<
-        R["favoritePost"]["posts"]["fields"],
-        R["favoritePost"]["posts"]["include"]
-      >
-    : { id: string };
-  _collection: "authors";
-  _template: "authors";
-};
-type pagesType<R extends pagesReferences = {}> = {
-  blocks?: (
-    | {
-        tagline?: string;
-        headline?: string;
-        text?: object;
-        actions?: {
-          label?: string;
-          type?: "button" | "link";
-          icon?: boolean;
-          link?: string;
-          _collection: "actions";
-          _template: "actions";
-        }[];
-        image?: {
-          src?: string;
-          alt?: string;
-          _collection: "image";
-          _template: "image";
-        };
-        color?: "default" | "tint" | "primary";
-        _template: "hero";
-      }
-    | {
-        items?: {
-          icon?: {
-            color?:
-              | "primary"
-              | "blue"
-              | "teal"
-              | "green"
-              | "red"
-              | "pink"
-              | "purple"
-              | "orange"
-              | "yellow";
-            style?: "circle" | "float";
-            name?:
-              | ""
-              | "aperture"
-              | "code"
-              | "like"
-              | "map"
-              | "palette"
-              | "chart"
-              | "pin"
-              | "shield"
-              | "settings"
-              | "store"
-              | "ball"
-              | "tube"
-              | "trophy"
-              | "user"
-              | "beer"
-              | "chat"
-              | "cloud"
-              | "coffee"
-              | "world"
-              | "tina";
-            _collection: "icon";
-            _template: "icon";
-          };
-          title?: string;
-          text?: string;
-          _collection: "items";
-          _template: "items";
-        }[];
-        color?: "default" | "tint" | "primary";
-        _template: "features";
-      }
-    | {
-        body?: object;
-        color?: "default" | "tint" | "primary";
-        _template: "content";
-      }
-    | {
-        quote?: string;
-        author?: string;
-        color?: "default" | "tint" | "primary";
-        _template: "testimonial";
-      }
-  )[];
-  _collection: "pages";
-  _template: "pages";
-};
-
 type postsFields = {
   title?: true;
   heroImg?: true;
@@ -205,11 +26,13 @@ type postsFields = {
   date?: true;
   _body?: true;
 };
+
 type postsReferences = {
   author?:
     | boolean
     | { authors: { fields?: authorsFields; include?: authorsReferences } };
 };
+
 type postsOptions = {
   fields?: postsFields;
   include?: postsReferences;
@@ -227,85 +50,6 @@ type postsReturn<
         : never;
     }
   : postsType<B>;
-
-type globalFields = {
-  header?: boolean | { icon?: boolean; color?: boolean; nav?: boolean };
-  footer?: boolean | { color?: boolean; social?: boolean };
-  theme?:
-    | boolean
-    | { color?: boolean; font?: boolean; icon?: boolean; darkMode?: boolean };
-};
-type globalReferences = {};
-type globalOptions = {
-  fields?: globalFields;
-  include?: globalReferences;
-};
-
-type globalReturn<
-  T extends globalFields | undefined,
-  B extends globalReferences
-> = T extends object
-  ? {
-      [Key in keyof T]: T[Key] extends true
-        ? Key extends keyof globalType
-          ? globalType[Key]
-          : never
-        : never;
-    }
-  : globalType<B>;
-
-type authorsFields = { name?: true; avatar?: true; favoritePost?: boolean };
-type authorsReferences = {
-  favoritePost?:
-    | boolean
-    | { posts: { fields?: postsFields; include?: postsReferences } };
-};
-type authorsOptions = {
-  fields?: authorsFields;
-  include?: authorsReferences;
-};
-
-type authorsReturn<
-  T extends authorsFields | undefined,
-  B extends authorsReferences
-> = T extends object
-  ? {
-      [Key in keyof T]: T[Key] extends true
-        ? Key extends keyof authorsType
-          ? authorsType[Key]
-          : never
-        : never;
-    }
-  : authorsType<B>;
-
-type pagesFields = {
-  blocks?:
-    | boolean
-    | {
-        hero?: boolean;
-        features?: boolean;
-        content?: boolean;
-        testimonial?: boolean;
-      };
-};
-type pagesReferences = {};
-type pagesOptions = {
-  fields?: pagesFields;
-  include?: pagesReferences;
-};
-
-type pagesReturn<
-  T extends pagesFields | undefined,
-  B extends pagesReferences
-> = T extends object
-  ? {
-      [Key in keyof T]: T[Key] extends true
-        ? Key extends keyof pagesType
-          ? pagesType[Key]
-          : never
-        : never;
-    }
-  : pagesType<B>;
 
 function posts<
   T extends postsFields | undefined,
@@ -405,6 +149,115 @@ function postsConnection<
   return {} as any;
 }
 
+type globalType<R extends globalReferences = {}> = {
+  header?: {
+    icon?: {
+      color?:
+        | "primary"
+        | "blue"
+        | "teal"
+        | "green"
+        | "red"
+        | "pink"
+        | "purple"
+        | "orange"
+        | "yellow";
+      style?: "circle" | "float";
+      name?:
+        | ""
+        | "aperture"
+        | "code"
+        | "like"
+        | "map"
+        | "palette"
+        | "chart"
+        | "pin"
+        | "shield"
+        | "settings"
+        | "store"
+        | "ball"
+        | "tube"
+        | "trophy"
+        | "user"
+        | "beer"
+        | "chat"
+        | "cloud"
+        | "coffee"
+        | "world"
+        | "tina";
+      _collection: "icon";
+      _template: "icon";
+    };
+    color?: "default" | "primary";
+    nav?: {
+      href?: string;
+      label?: string;
+      _collection: "nav";
+      _template: "nav";
+    }[];
+    _collection: "header";
+    _template: "header";
+  };
+  footer?: {
+    color?: "default" | "primary";
+    social?: {
+      facebook?: string;
+      twitter?: string;
+      instagram?: string;
+      github?: string;
+      _collection: "social";
+      _template: "social";
+    };
+    _collection: "footer";
+    _template: "footer";
+  };
+  theme?: {
+    color?:
+      | "blue"
+      | "teal"
+      | "green"
+      | "red"
+      | "pink"
+      | "purple"
+      | "orange"
+      | "yellow";
+    font?: "sans" | "nunito" | "lato";
+    icon?: "boxicon" | "heroicon";
+    darkMode?: "system" | "light" | "dark";
+    _collection: "theme";
+    _template: "theme";
+  };
+  _collection: "global";
+  _template: "global";
+};
+type globalFields = {
+  header?: boolean | { icon?: boolean; color?: boolean; nav?: boolean };
+  footer?: boolean | { color?: boolean; social?: boolean };
+  theme?:
+    | boolean
+    | { color?: boolean; font?: boolean; icon?: boolean; darkMode?: boolean };
+};
+
+type globalReferences = {};
+
+type globalOptions = {
+  fields?: globalFields;
+  include?: globalReferences;
+};
+
+type globalReturn<
+  T extends globalFields | undefined,
+  B extends globalReferences
+> = T extends object
+  ? {
+      [Key in keyof T]: T[Key] extends true
+        ? Key extends keyof globalType
+          ? globalType[Key]
+          : never
+        : never;
+    }
+  : globalType<B>;
+
 function global<
   T extends globalFields | undefined,
   B extends globalReferences
@@ -502,6 +355,46 @@ function globalConnection<
 } {
   return {} as any;
 }
+
+type authorsType<R extends authorsReferences = {}> = {
+  name?: string;
+  avatar?: string;
+  favoritePost?: R["favoritePost"] extends true
+    ? postsType
+    : R["favoritePost"] extends { posts: postsOptions }
+    ? postsReturn<
+        R["favoritePost"]["posts"]["fields"],
+        R["favoritePost"]["posts"]["include"]
+      >
+    : { id: string };
+  _collection: "authors";
+  _template: "authors";
+};
+type authorsFields = { name?: true; avatar?: true; favoritePost?: boolean };
+
+type authorsReferences = {
+  favoritePost?:
+    | boolean
+    | { posts: { fields?: postsFields; include?: postsReferences } };
+};
+
+type authorsOptions = {
+  fields?: authorsFields;
+  include?: authorsReferences;
+};
+
+type authorsReturn<
+  T extends authorsFields | undefined,
+  B extends authorsReferences
+> = T extends object
+  ? {
+      [Key in keyof T]: T[Key] extends true
+        ? Key extends keyof authorsType
+          ? authorsType[Key]
+          : never
+        : never;
+    }
+  : authorsType<B>;
 
 function authors<
   T extends authorsFields | undefined,
@@ -603,6 +496,122 @@ function authorsConnection<
 } {
   return {} as any;
 }
+
+type pagesType<R extends pagesReferences = {}> = {
+  blocks?: (
+    | {
+        tagline?: string;
+        headline?: string;
+        text?: object;
+        actions?: {
+          label?: string;
+          type?: "button" | "link";
+          icon?: boolean;
+          link?: string;
+          _collection: "actions";
+          _template: "actions";
+        }[];
+        image?: {
+          src?: string;
+          alt?: string;
+          _collection: "image";
+          _template: "image";
+        };
+        color?: "default" | "tint" | "primary";
+        _template: "hero";
+      }
+    | {
+        items?: {
+          icon?: {
+            color?:
+              | "primary"
+              | "blue"
+              | "teal"
+              | "green"
+              | "red"
+              | "pink"
+              | "purple"
+              | "orange"
+              | "yellow";
+            style?: "circle" | "float";
+            name?:
+              | ""
+              | "aperture"
+              | "code"
+              | "like"
+              | "map"
+              | "palette"
+              | "chart"
+              | "pin"
+              | "shield"
+              | "settings"
+              | "store"
+              | "ball"
+              | "tube"
+              | "trophy"
+              | "user"
+              | "beer"
+              | "chat"
+              | "cloud"
+              | "coffee"
+              | "world"
+              | "tina";
+            _collection: "icon";
+            _template: "icon";
+          };
+          title?: string;
+          text?: string;
+          _collection: "items";
+          _template: "items";
+        }[];
+        color?: "default" | "tint" | "primary";
+        _template: "features";
+      }
+    | {
+        body?: object;
+        color?: "default" | "tint" | "primary";
+        _template: "content";
+      }
+    | {
+        quote?: string;
+        author?: string;
+        color?: "default" | "tint" | "primary";
+        _template: "testimonial";
+      }
+  )[];
+  _collection: "pages";
+  _template: "pages";
+};
+type pagesFields = {
+  blocks?:
+    | boolean
+    | {
+        hero?: boolean;
+        features?: boolean;
+        content?: boolean;
+        testimonial?: boolean;
+      };
+};
+
+type pagesReferences = {};
+
+type pagesOptions = {
+  fields?: pagesFields;
+  include?: pagesReferences;
+};
+
+type pagesReturn<
+  T extends pagesFields | undefined,
+  B extends pagesReferences
+> = T extends object
+  ? {
+      [Key in keyof T]: T[Key] extends true
+        ? Key extends keyof pagesType
+          ? pagesType[Key]
+          : never
+        : never;
+    }
+  : pagesType<B>;
 
 function pages<
   T extends pagesFields | undefined,
@@ -722,6 +731,24 @@ const generateNamespacedFieldName = (names: string[], suffix: string = "") => {
   return (suffix ? [...names, suffix] : names).map(capitalize).join("");
 };
 
+const systemFragment = `fragment SystemInfo on Document {
+  id
+  _sys {
+    filename
+    basename
+    breadcrumbs
+    path
+    relativePath
+    extension
+    template
+    collection {
+      name
+      format
+    }
+  }
+  __typename
+}`;
+
 export const query = <
   B,
   A extends keyof Collection,
@@ -758,7 +785,7 @@ export const query = <
             );
             if (options.include[field.name] === true) {
               return `${field.name} {
-                __typename
+                ...SystemInfo
                 ${referencedCollections.map((collection: any) => {
                   const f = addFields(collection.fields, options);
                   return `...on ${generateNamespacedFieldName(
@@ -788,7 +815,7 @@ export const query = <
             }`;
           }
         }
-        return `${field.name} { __typename
+        return `${field.name} {
         ...on Document {
           id
         }
@@ -835,6 +862,7 @@ export const query = <
     }
     const f = addFields(collection.fields, args);
     return `${docName(collection.name, args.relativePath)} {
+...SystemInfo
 ${f}
 }`;
   };
@@ -847,7 +875,10 @@ ${f}
     }
     const f = addFields(collection.fields, args);
     return `${docName(collection.name, args.relativePath, true)} {
-edges { node {${f}} }
+edges { node {
+  ...SystemInfo
+  ${f}
+} }
 }`;
   };
 
@@ -863,7 +894,8 @@ edges { node {${f}} }
   // @ts-ignore
   const query = callback(cb);
 
-  let queryString = `query {`;
+  let queryString = `
+query {`;
   Object.entries(query).forEach(([key, value]) => {
     queryString =
       queryString +
@@ -871,6 +903,7 @@ edges { node {${f}} }
 `;
   });
   queryString = queryString + `}`;
+  queryString = queryString + `${systemFragment}`;
 
   return fetch("http://localhost:4001/graphql", {
     method: "POST",
@@ -880,13 +913,20 @@ edges { node {${f}} }
     body: JSON.stringify({
       query: queryString,
     }),
-  }).then(async (res) => {
-    const json = await res.json();
-    return {
-      query: queryString,
-      ...json,
-    };
-  });
+  })
+    .then(async (res) => {
+      const json = await res.json();
+      return {
+        query: queryString,
+        ...json,
+      };
+    })
+    .catch(async (e) => {
+      return {
+        query: queryString,
+        errors: e.message,
+      };
+    });
 };
 
 export type AsyncReturnType<T extends (...args: any) => Promise<any>> =
