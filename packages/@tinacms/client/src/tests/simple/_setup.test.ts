@@ -1,6 +1,5 @@
 import { createClientInner } from '../..'
 import { TinaSchema, addNamespaceToSchema } from '@tinacms/schema-tools'
-import fs from 'fs-extra'
 import '../helpers'
 
 /**
