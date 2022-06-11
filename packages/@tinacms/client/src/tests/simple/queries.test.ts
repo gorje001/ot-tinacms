@@ -1,5 +1,5 @@
 import { format, snapPath, proxy } from '../helpers'
-import { query } from './client'
+import { query } from './generated/client'
 
 it('simple query', async () => {
   const result = await query(({ post }) => ({

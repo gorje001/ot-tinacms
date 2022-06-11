@@ -1,5 +1,6 @@
 import { createClientInner } from '../..'
 import { TinaSchema, addNamespaceToSchema } from '@tinacms/schema-tools'
+import fs from 'fs-extra'
 import '../helpers'
 
 /**
@@ -7,6 +8,11 @@ import '../helpers'
  * NOTE:
  * This test actually creates the client module
  * and puts it in `client.ts` for other tests
+ *
+ * Ideally this would just be a beforeAll() type of
+ * thing but just watchers get into an endless loop
+ * when you generate a file in the tests directory so
+ * not sure of how to get out of it
  */
 it('Creates the client', async () => {
   const tinaSchema = new TinaSchema({
@@ -42,5 +48,5 @@ it('Creates the client', async () => {
     { tinaSchema },
     `const schema = ${JSON.stringify(addNamespaceToSchema(tinaSchema.config))}`
   )
-  expect(client).toMatchFile('./src/tests/simple/client.ts')
+  expect(client).toMatchFile('./src/tests/simple/generated/client.ts')
 })
