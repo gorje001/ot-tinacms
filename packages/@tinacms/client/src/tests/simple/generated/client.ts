@@ -51,6 +51,11 @@ type postType<R extends postReferences = {}> = {
 }
 type postFields = { title?: true; author?: boolean }
 
+type postFilter = {
+  title?: { eq?: string; startsWith?: string }
+  author?: { author: authorFilter }
+}
+
 type postReferences = {
   author?:
     | boolean
@@ -124,6 +129,7 @@ function postConnection<
   after?: string
   last?: number
   before?: string
+  filter?: postFilter
   fields?: never
   include?: B
 }): { edges: { node: postType<B> }[] }
@@ -135,6 +141,7 @@ function postConnection<
   after?: string
   last?: number
   before?: string
+  filter?: postFilter
   fields?: T
   include?: never
 }): {
@@ -196,6 +203,8 @@ type authorType<R extends authorReferences = {}> = {
   }
 }
 type authorFields = { name?: true }
+
+type authorFilter = { name?: { eq?: string; startsWith?: string } }
 
 type authorReferences = {}
 
@@ -266,6 +275,7 @@ function authorConnection<
   after?: string
   last?: number
   before?: string
+  filter?: authorFilter
   fields?: never
   include?: B
 }): { edges: { node: authorType<B> }[] }
@@ -277,6 +287,7 @@ function authorConnection<
   after?: string
   last?: number
   before?: string
+  filter?: authorFilter
   fields?: T
   include?: never
 }): {
@@ -451,6 +462,43 @@ export const query = <
 
     return fields.map((f) => addField(f, options)).join('\n')
   }
+
+  const buildFieldFilter = (field, value) => {
+    switch (field.type) {
+      case 'reference':
+        let referenceFilters = '{'
+        Object.entries(value).forEach(([collectionName, args]) => {
+          const collection = schema.collections.find(
+            (c) => c.name === collectionName
+          )
+          referenceFilters =
+            referenceFilters +
+            `${collection.name}:${buildFilters(collection, args)}`
+        })
+        referenceFilters = referenceFilters + '}'
+        return referenceFilters
+      case 'string':
+        let stringFilters = '{'
+        Object.entries(value).forEach(([filterKey, filterValue]) => {
+          stringFilters = stringFilters + `${filterKey}: "${filterValue}"`
+        })
+        return (stringFilters = stringFilters + '}')
+        return stringFilters
+      default:
+        return `{ eq: "default"}`
+    }
+    return `{ eq: "ok"}`
+  }
+
+  const buildFilters = (collection, args) => {
+    let filter = '{'
+    Object.entries(args).forEach(([key, value]) => {
+      const field = collection.fields.find((field) => field.name === key)
+      filter = filter + `${key}: ${buildFieldFilter(field, value)}`
+    })
+    filter = filter + '}'
+    return filter
+  }
   const docName = (collection: any, args: any, list?: boolean) => {
     const name = collection.name
     if (!list) {
@@ -471,7 +519,12 @@ export const query = <
             } else {
               val = `"${value}"`
             }
-            connectionArgs = connectionArgs + `${key}: ${val},`
+            if (key === 'filter') {
+              connectionArgs =
+                connectionArgs + `filter: ${buildFilters(collection, value)}`
+            } else {
+              connectionArgs = connectionArgs + `${key}: ${val},`
+            }
           }
         })
         connectionArgs = connectionArgs + ')'

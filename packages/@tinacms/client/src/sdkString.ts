@@ -122,6 +122,39 @@ export const query = <
 
     return fields.map((f) => addField(f, options)).join('\\n')
   }
+
+  const buildFieldFilter = (field, value) => {
+    switch(field.type) {
+      case "reference":
+        let referenceFilters = "{"
+        Object.entries(value).forEach(([collectionName, args]) => {
+          const collection = schema.collections.find((c) => c.name === collectionName)
+          referenceFilters = referenceFilters + \`\${collection.name}:\${buildFilters(collection, args)}\`
+        })
+        referenceFilters = referenceFilters + "}"
+        return referenceFilters
+      case "string":
+        let stringFilters = "{"
+        Object.entries(value).forEach(([filterKey, filterValue]) => {
+          stringFilters = stringFilters + \`\${filterKey}: "\${filterValue}"\`
+        })
+        return stringFilters = stringFilters + "}"
+        return stringFilters
+      default:
+        return \`{ eq: "default"}\`
+    }
+    return \`{ eq: "ok"}\`
+  }
+
+  const buildFilters = (collection, args) => {
+    let filter = "{"
+    Object.entries(args).forEach(([key, value]) => {
+      const field = collection.fields.find(field => field.name === key)
+      filter = filter + \`\${key}: \${buildFieldFilter(field, value)}\`
+    })
+    filter = filter + "}"
+    return filter
+  }
   const docName = (collection: any, args: any, list?: boolean) => {
     const name = collection.name
     if (!list) {
@@ -142,7 +175,11 @@ export const query = <
             } else {
               val = \`"\${value}"\`
             }
-            connectionArgs = connectionArgs + \`\${key}: \${val},\`
+            if(key === 'filter') {
+              connectionArgs = connectionArgs + \`filter: \${buildFilters(collection, value)}\`
+            } else {
+              connectionArgs = connectionArgs + \`\${key}: \${val},\`
+            }
           }
         })
        connectionArgs = connectionArgs + ")"

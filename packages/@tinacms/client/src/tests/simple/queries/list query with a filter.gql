@@ -1,0 +1,17 @@
+query {
+  posts: postConnection(
+    filter: { author: { author: { name: { eq: "okok" } } } }
+  ) {
+    edges {
+      node {
+        ...SystemInfo
+        title
+        author {
+          ... on Document {
+            id
+          }
+        }
+      }
+    }
+  }
+}

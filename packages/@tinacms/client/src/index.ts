@@ -37,6 +37,38 @@ ${types}
   return res
 }
 
+const buildFieldFilter = (field: TinaField) => {
+  switch (field.type) {
+    case 'object':
+      const opts = []
+      if (field.fields) {
+        if (typeof field.fields === 'string') {
+          throw new Error('Global templates not supported')
+        }
+        field.fields.forEach((field) => {
+          opts.push(field.name)
+        })
+      } else {
+        field.templates.forEach((template) => {
+          if (typeof template === 'string') {
+            throw new Error('Global templates not supported')
+          }
+          opts.push(template.name)
+        })
+      }
+      return `boolean | { ${opts.map((o) => `${o}?: boolean`)} }`
+    case 'reference':
+      let filter = `{`
+      field.collections.forEach((collection) => {
+        filter = filter + `${collection}: ${collection}Filter;`
+      })
+
+      filter = filter + `}`
+      return filter
+    default:
+      return `{eq?: string, startsWith?: string}`
+  }
+}
 const buildFieldType = (field: TinaField) => {
   switch (field.type) {
     case 'object':
@@ -64,6 +96,9 @@ const buildFieldType = (field: TinaField) => {
   }
 }
 
+const buildFieldFilterStatement = (field) =>
+  `${field.name}?: ${buildFieldFilter(field)}`
+
 const buildFieldTypeStatement = (field) =>
   `${field.name}?: ${buildFieldType(field)}`
 
@@ -80,6 +115,10 @@ ${buildTypes2(collection)}
 type ${collection.name}Fields = { ${collection.fields
     .map(buildFieldTypeStatement)
     .join(', ')} }
+
+type ${collection.name}Filter= { ${collection.fields
+    .map(buildFieldFilterStatement)
+    .join(', ')}}
 
 type ${collection.name}References = { ${collection.fields
     .filter((f) => f.type === 'reference')
@@ -152,7 +191,9 @@ function ${collection.name}<T extends ${
 function ${collection.name}Connection<
   T extends ${collection.name}Fields | undefined,
   B extends ${collection.name}References
->(args?: { first?: number; after?: string; last?: number; before?: string; fields?: never; include?: B }): {edges: {node: ${
+>(args?: { first?: number; after?: string; last?: number; before?: string; filter?: ${
+    collection.name
+  }Filter, fields?: never; include?: B }): {edges: {node: ${
     collection.name
   }Type<B>}[]};
 function ${collection.name}Connection<
@@ -160,6 +201,7 @@ function ${collection.name}Connection<
   B extends ${collection.name}References
 >(args?: {
   first?: number; after?: string; last?: number; before?: string;
+  filter?: ${collection.name}Filter
   fields?: T;
   include?: never;
 }): {
