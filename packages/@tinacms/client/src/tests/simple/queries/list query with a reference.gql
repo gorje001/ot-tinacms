@@ -1,0 +1,16 @@
+query {
+  posts: postConnection(include: "[object Object]") {
+    edges {
+      node {
+        ...SystemInfo
+        title
+        author {
+          ...SystemInfo
+          ... on Author {
+            name
+          }
+        }
+      }
+    }
+  }
+}

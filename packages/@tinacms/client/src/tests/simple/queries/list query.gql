@@ -1,0 +1,15 @@
+query {
+  posts: postConnection {
+    edges {
+      node {
+        ...SystemInfo
+        title
+        author {
+          ... on Document {
+            id
+          }
+        }
+      }
+    }
+  }
+}

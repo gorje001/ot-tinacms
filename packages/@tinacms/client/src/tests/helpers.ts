@@ -21,8 +21,26 @@ export const snapPath = () =>
 export const proxy = <T>(obj: T): T => {
   // @ts-ignore
   return new Proxy(obj, {
-    get: (subject, name) => {
+    get: () => {
       return proxy(obj)
     },
   })
 }
+
+type SystemInfoType = {
+  filename: string
+  basename: string
+  breadcrumbs: string[]
+  path: string
+  relativePath: string
+  extension: string
+  template: string
+  collection: { name: string; format: string }
+  __typename: string
+}
+
+export const assertString = (val: string) => proxy(val)
+export const assertOptionalString = (val?: string) => proxy(val)
+export const assertObject = (val: object) => proxy(val)
+export const assertOptionalObject = (val?: object) => proxy(val)
+export const assertSystemInfo = (val: SystemInfoType) => proxy(val)

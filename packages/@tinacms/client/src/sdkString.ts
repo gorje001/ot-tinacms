@@ -122,13 +122,21 @@ export const query = <
 
     return fields.map((f) => addField(f, options)).join('\\n')
   }
-  const docName = (name: any, relativePath: any, list?: boolean) => {
+  const docName = (name: any, args: any, list?: boolean) => {
     if (!list) {
       return \`\${name}\${
         list ? 'Connection' : ''
-      }(relativePath: "\${relativePath}")\`
+      }(relativePath: "\${args.relativePath}")\`
     }
-    return \`\${name}\${list ? 'Connection' : ''}\`
+    let connectionArgs = ''
+    if(args) {
+      connectionArgs = "("
+      Object.entries(args).forEach(([key, value], index) => {
+        connectionArgs = connectionArgs + \`\${key}: "\${value}",\`
+      })
+      connectionArgs = connectionArgs + ")"
+    }
+    return \`\${name}\${list ? 'Connection' : ''}\${connectionArgs}\`
   }
 
   const buildCol = (collection: any, args: any) => {
@@ -145,7 +153,7 @@ export const query = <
 
     const maybeSystemInfo = args?.fields ? '' : '...SystemInfo'
 
-    return \`\${docName(collection.name, args.relativePath)} {
+    return \`\${docName(collection.name, args)} {
 \${maybeSystemInfo}
 \${f}
 }\`
@@ -158,7 +166,7 @@ export const query = <
       throw new Error('no global templates supported')
     }
     const f = addFields(collection.fields, args)
-    return \`\${docName(collection.name, args.relativePath, true)} {
+    return \`\${docName(collection.name, args, true)} {
 edges { node {
   ...SystemInfo
   \${f}

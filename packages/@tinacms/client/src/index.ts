@@ -152,14 +152,14 @@ function ${collection.name}<T extends ${
 function ${collection.name}Connection<
   T extends ${collection.name}Fields | undefined,
   B extends ${collection.name}References
->(args: { first: string; fields?: never; include?: B }): {edges: {node: ${
+>(args?: { first?: number; after?: string; last?: number; before?: string; fields?: never; include?: B }): {edges: {node: ${
     collection.name
   }Type<B>}[]};
 function ${collection.name}Connection<
   T extends ${collection.name}Fields | undefined,
   B extends ${collection.name}References
->(args: {
-  first: string;
+>(args?: {
+  first?: number; after?: string; last?: number; before?: string;
   fields?: T;
   include?: never;
 }): {
