@@ -1,5 +1,7 @@
 query {
-  posts: postConnection(filter: { title: { eq: "Hello, World!" } }) {
+  posts: postConnection(
+    filter: { author: { author: { name: { eq: "Pedro" } } } }
+  ) {
     edges {
       node {
         ...SystemInfo
