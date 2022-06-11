@@ -1,5 +1,5 @@
 query {
-  posts: postConnection(first: "2", before: "some-string") {
+  posts: postConnection(first: 2, before: "some-string") {
     edges {
       node {
         ...SystemInfo

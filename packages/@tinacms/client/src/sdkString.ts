@@ -122,7 +122,8 @@ export const query = <
 
     return fields.map((f) => addField(f, options)).join('\\n')
   }
-  const docName = (name: any, args: any, list?: boolean) => {
+  const docName = (collection: any, args: any, list?: boolean) => {
+    const name = collection.name
     if (!list) {
       return \`\${name}\${
         list ? 'Connection' : ''
@@ -134,8 +135,14 @@ export const query = <
       if(Object.keys(queryArgs).length > 0) {
         connectionArgs = "("
         Object.entries(queryArgs).forEach(([key, value], index) => {
-          if(key !== 'include') {
-            connectionArgs = connectionArgs + \`\${key}: "\${value}",\`
+          if(!['include', 'fields'].includes(key)) {
+            let val = ''
+            if(["first", "last"].includes(key)) {
+              val = value
+            } else {
+              val = \`"\${value}"\`
+            }
+            connectionArgs = connectionArgs + \`\${key}: \${val},\`
           }
         })
        connectionArgs = connectionArgs + ")"
@@ -158,7 +165,7 @@ export const query = <
 
     const maybeSystemInfo = args?.fields ? '' : '...SystemInfo'
 
-    return \`\${docName(collection.name, args)} {
+    return \`\${docName(collection, args)} {
 \${maybeSystemInfo}
 \${f}
 }\`
@@ -171,7 +178,7 @@ export const query = <
       throw new Error('no global templates supported')
     }
     const f = addFields(collection.fields, args)
-    return \`\${docName(collection.name, args, true)} {
+    return \`\${docName(collection, args, true)} {
 edges { node {
   ...SystemInfo
   \${f}
