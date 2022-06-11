@@ -130,11 +130,16 @@ export const query = <
     }
     let connectionArgs = ''
     if(args) {
-      connectionArgs = "("
-      Object.entries(args).forEach(([key, value], index) => {
-        connectionArgs = connectionArgs + \`\${key}: "\${value}",\`
-      })
-      connectionArgs = connectionArgs + ")"
+      const {include, fields,...queryArgs} = args
+      if(Object.keys(queryArgs).length > 0) {
+        connectionArgs = "("
+        Object.entries(queryArgs).forEach(([key, value], index) => {
+          if(key !== 'include') {
+            connectionArgs = connectionArgs + \`\${key}: "\${value}",\`
+          }
+        })
+       connectionArgs = connectionArgs + ")"
+      }
     }
     return \`\${name}\${list ? 'Connection' : ''}\${connectionArgs}\`
   }

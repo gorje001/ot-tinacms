@@ -88,6 +88,8 @@ it('list query with basic arguments', async () => {
   expect(format(result.query)).toMatchFile(snapPath())
 })
 
+it.skip('list query with a filter', async () => {})
+
 it('list query with a reference', async () => {
   const result = await query(({ postConnection }) => ({
     posts: postConnection({ include: { author: true } }),

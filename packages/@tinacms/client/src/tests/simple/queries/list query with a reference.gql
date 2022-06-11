@@ -1,5 +1,5 @@
 query {
-  posts: postConnection(include: "[object Object]") {
+  posts: postConnection {
     edges {
       node {
         ...SystemInfo
