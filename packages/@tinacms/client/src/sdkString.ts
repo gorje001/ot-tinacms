@@ -35,6 +35,7 @@ export const query = <
   callback: (sdk: Collection) => C
 ): Promise<{ data: C; errors?: object[]; query: string }> => {
   const cb = {}
+  let addSystemFragment = false
 
   const addField = (field: any, options: any): any => {
     switch (field.type) {
@@ -138,8 +139,14 @@ export const query = <
       throw new Error('no global templates supported')
     }
     const f = addFields(collection.fields, args)
+    if (!args?.fields) {
+      addSystemFragment = true
+    }
+
+    const maybeSystemInfo = args?.fields ? '' : '...SystemInfo'
+
     return \`\${docName(collection.name, args.relativePath)} {
-...SystemInfo
+\${maybeSystemInfo}
 \${f}
 }\`
   }
@@ -177,7 +184,9 @@ query {\`
     queryString = queryString + \`\${key}: \${value}\n\`
   })
   queryString = queryString + \`}\`
-  queryString = queryString + \`\${systemFragment}\`
+  if (addSystemFragment) {
+    queryString = queryString + \`\${systemFragment}\`
+  }
 
   return fetch('http://localhost:4001/graphql', {
     method: 'POST',

@@ -134,6 +134,9 @@ const buildFields = (
       `_collection: "${field.name}", _template: "${field.name}"`
     )
   }
+  fieldStrings.push(
+    `_sys: {filename: string, basename: string, breadcrumbs: string[], path: string, relativePath: string, extension: string, template: string, collection: {name: string, format: string}, __typename: string}`
+  )
   let string = `{${fieldStrings.join(',\n')}}`
   if (field.list) {
     string = `${string}[]`

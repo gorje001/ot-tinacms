@@ -1,0 +1,5 @@
+query {
+  post: post(relativePath: "ok.md") {
+    title
+  }
+}

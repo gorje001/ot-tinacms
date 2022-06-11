@@ -202,7 +202,7 @@ function ${collection.name}Connection<T extends ${
 }`
 }
 
-const buildTypes = (tinaSchema: TinaSchema) => {
+export const buildTypes = (tinaSchema: TinaSchema) => {
   const collections = tinaSchema.getCollections()
   const collectionTypes = []
   tinaSchema.getCollections().map((collection) => {

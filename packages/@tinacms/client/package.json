@@ -43,6 +43,7 @@
     "@tinacms/schema-tools": "workspace:*",
     "fs-extra": "^10.1.0",
     "graphql": "^15.1.0",
+    "jest-snapshot": "^28.1.1",
     "prettier": "^2.6.2"
   },
   "publishConfig": {

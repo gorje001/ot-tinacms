@@ -1,0 +1,29 @@
+query {
+  post: post(relativePath: "ok.md") {
+    ...SystemInfo
+    title
+    author {
+      ...SystemInfo
+      ... on Author {
+        name
+      }
+    }
+  }
+}
+fragment SystemInfo on Document {
+  id
+  _sys {
+    filename
+    basename
+    breadcrumbs
+    path
+    relativePath
+    extension
+    template
+    collection {
+      name
+      format
+    }
+  }
+  __typename
+}
