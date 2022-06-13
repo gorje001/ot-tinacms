@@ -5,7 +5,20 @@ const schema = {
       name: 'post',
       path: '',
       fields: [
-        { name: 'title', type: 'string', namespace: ['post', 'title'] },
+        {
+          name: 'title',
+          type: 'string',
+          required: true,
+          namespace: ['post', 'title'],
+        },
+        { name: 'created', type: 'datetime', namespace: ['post', 'created'] },
+        { name: 'featured', type: 'boolean', namespace: ['post', 'featured'] },
+        {
+          name: 'categories',
+          type: 'string',
+          list: true,
+          namespace: ['post', 'categories'],
+        },
         {
           name: 'author',
           type: 'reference',
@@ -26,7 +39,10 @@ const schema = {
 }
 
 type postType<R extends postReferences = {}> = {
-  title?: string
+  title: string
+  created?: string
+  featured?: boolean
+  categories?: string[]
   author?: R['author'] extends true
     ? authorType
     : R['author'] extends { author: authorOptions }
@@ -49,10 +65,19 @@ type postType<R extends postReferences = {}> = {
     __typename: string
   }
 }
-type postFields = { title?: true; author?: boolean }
+type postFields = {
+  title?: true
+  created?: true
+  featured?: true
+  categories?: true
+  author?: boolean
+}
 
 type postFilter = {
   title?: { eq?: string; startsWith?: string }
+  created?: { eq?: string; startsWith?: string }
+  featured?: { eq?: string; startsWith?: string }
+  categories?: { eq?: string; startsWith?: string }
   author?: { author: authorFilter }
 }
 
@@ -132,7 +157,19 @@ function postConnection<
   filter?: postFilter
   fields?: never
   include?: B
-}): { edges: { node: postType<B> }[] }
+}): {
+  totalCount: number
+  pageInfo: {
+    hasPreviousPage: boolean
+    hasNextPage: boolean
+    startCursor: string
+    endCursor: string
+  }
+  edges: {
+    cursor: string
+    node: postType<B>
+  }[]
+}
 function postConnection<
   T extends postFields | undefined,
   B extends postReferences
@@ -145,7 +182,15 @@ function postConnection<
   fields?: T
   include?: never
 }): {
+  totalCount: number
+  pageInfo: {
+    hasPreviousPage: boolean
+    hasNextPage: boolean
+    startCursor: string
+    endCursor: string
+  }
   edges: {
+    cursor: string
     node: {
       [Key in keyof T]: T[Key] extends true
         ? Key extends keyof postType
@@ -278,7 +323,19 @@ function authorConnection<
   filter?: authorFilter
   fields?: never
   include?: B
-}): { edges: { node: authorType<B> }[] }
+}): {
+  totalCount: number
+  pageInfo: {
+    hasPreviousPage: boolean
+    hasNextPage: boolean
+    startCursor: string
+    endCursor: string
+  }
+  edges: {
+    cursor: string
+    node: authorType<B>
+  }[]
+}
 function authorConnection<
   T extends authorFields | undefined,
   B extends authorReferences
@@ -291,7 +348,15 @@ function authorConnection<
   fields?: T
   include?: never
 }): {
+  totalCount: number
+  pageInfo: {
+    hasPreviousPage: boolean
+    hasNextPage: boolean
+    startCursor: string
+    endCursor: string
+  }
   edges: {
+    cursor: string
     node: {
       [Key in keyof T]: T[Key] extends true
         ? Key extends keyof authorType
@@ -348,6 +413,26 @@ const generateNamespacedFieldName = (names: string[], suffix: string = '') => {
   return (suffix ? [...names, suffix] : names).map(capitalize).join('')
 }
 
+const connectionFragment = `fragment ConnectionFragment on Connection {
+  totalCount
+  pageInfo {
+    hasPreviousPage
+    hasNextPage
+    startCursor
+    endCursor
+  }
+  ...on DocumentConnection {
+    edges {
+      cursor
+      node {
+        ...on Document {
+          id
+        }
+      }
+    }
+  }
+}`
+
 const systemFragment = `fragment SystemInfo on Document {
   id
   _sys {
@@ -376,6 +461,7 @@ export const query = <
 ): Promise<{ data: C; errors?: object[]; query: string }> => {
   const cb = {}
   let addSystemFragment = false
+  let addConnectionFragment = false
 
   const addField = (field: any, options: any): any => {
     switch (field.type) {
@@ -487,7 +573,6 @@ export const query = <
       default:
         return `{ eq: "default"}`
     }
-    return `{ eq: "ok"}`
   }
 
   const buildFilters = (collection, args) => {
@@ -559,10 +644,11 @@ ${f}
     if (typeof collection.fields === 'string') {
       throw new Error('no global templates supported')
     }
+    addConnectionFragment = true
     const f = addFields(collection.fields, args)
     return `${docName(collection, args, true)} {
+...ConnectionFragment
 edges { node {
-  ...SystemInfo
   ${f}
 } }
 }`
@@ -591,6 +677,9 @@ query {`
   queryString = queryString + `}`
   if (addSystemFragment) {
     queryString = queryString + `${systemFragment}`
+  }
+  if (addConnectionFragment) {
+    queryString = queryString + `${connectionFragment}`
   }
 
   return fetch('http://localhost:4001/graphql', {

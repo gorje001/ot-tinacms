@@ -23,6 +23,20 @@ it('Creates the client', async () => {
           {
             name: 'title',
             type: 'string',
+            required: true,
+          },
+          {
+            name: 'created',
+            type: 'datetime',
+          },
+          {
+            name: 'featured',
+            type: 'boolean',
+          },
+          {
+            name: 'categories',
+            type: 'string',
+            list: true,
           },
           {
             name: 'author',

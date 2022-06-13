@@ -2,6 +2,9 @@ query {
   post: post(relativePath: "ok.md") {
     ...SystemInfo
     title
+    created
+    featured
+    categories
     author {
       ... on Document {
         id

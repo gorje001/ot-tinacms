@@ -1,14 +1,36 @@
 query {
   posts: postConnection {
+    ...ConnectionFragment
     edges {
       node {
-        ...SystemInfo
         title
+        created
+        featured
+        categories
         author {
           ...SystemInfo
           ... on Author {
             name
           }
+        }
+      }
+    }
+  }
+}
+fragment ConnectionFragment on Connection {
+  totalCount
+  pageInfo {
+    hasPreviousPage
+    hasNextPage
+    startCursor
+    endCursor
+  }
+  ... on DocumentConnection {
+    edges {
+      cursor
+      node {
+        ... on Document {
+          id
         }
       }
     }

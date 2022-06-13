@@ -7,8 +7,27 @@ import {
   assertObject,
   assertOptionalObject,
   assertSystemInfo,
+  assertMatches,
+  SystemInfoType,
 } from '../helpers'
 import { query } from './generated/client'
+
+type TestPost = {
+  title: string
+  created?: string
+  featured?: boolean
+  author?: { id: string }
+  categories?: string[]
+  _sys: SystemInfoType
+  _collection: string
+  _template: string
+}
+type TestAuthor = {
+  name?: string
+  _sys: SystemInfoType
+  _collection: string
+  _template: string
+}
 
 it('simple query', async () => {
   const result = await query(({ post }) => ({
@@ -16,17 +35,7 @@ it('simple query', async () => {
   }))
   expect(format(result.query)).toMatchFile(snapPath())
 
-  // it has access to post properties
-  assertOptionalString(proxy(result).data.post.title)
-  assertString(proxy(result).data.post._collection)
-  assertString(proxy(result).data.post._template)
-
-  // it has access to the id on a reference
-  assertOptionalObject(proxy(result).data.post.author)
-  assertOptionalString(proxy(result).data.post.author?.id)
-
-  // it has access to system properties
-  assertSystemInfo(proxy(result).data.post._sys)
+  assertMatches<TestPost>(proxy(result).data.post)
 
   // @ts-expect-error it does not have access to author properties
   proxy(result).data.post.author.name
@@ -40,16 +49,8 @@ it('simple query with the author', async () => {
   }))
   expect(format(result.query)).toMatchFile(snapPath())
 
-  // it has access to post properties
-  assertOptionalString(proxy(result).data.post.title)
-
-  // it has access to author properties
-  const maybeAuthor = proxy(result).data.post.author
-  assertOptionalString(maybeAuthor?.name)
-  // it has access to author system properties
-  if (maybeAuthor) {
-    assertSystemInfo(maybeAuthor._sys)
-  }
+  type Test = Omit<TestPost, 'author'> & { author?: TestAuthor }
+  assertMatches<Test>(proxy(result).data.post)
 })
 
 it('simple query selected fields', async () => {
@@ -58,8 +59,7 @@ it('simple query selected fields', async () => {
   }))
   expect(format(result.query)).toMatchFile(snapPath())
 
-  // it has access the title property
-  assertOptionalString(proxy(result).data.post.title)
+  assertMatches<{ title: string }>(proxy(result).data.post)
   // @ts-expect-error it does not have access to sysem properties
   proxy(result).data.post._sys
   // @ts-expect-error it does not have access to other properties
@@ -72,13 +72,16 @@ it('list query', async () => {
   }))
   expect(format(result.query)).toMatchFile(snapPath())
 
-  const edge = proxy(result).data.posts.edges[0]
-  assertOptionalObject(edge)
-  if (edge) {
-    assertObject(edge.node)
-    assertOptionalString(edge.node.title)
-    assertSystemInfo(edge.node._sys)
-  }
+  const posts = proxy(result).data.posts
+  assertMatches<{
+    pageInfo: {
+      hasPreviousPage: boolean
+      hasNextPage: boolean
+      startCursor: string
+      endCursor: string
+    }
+    edges: { cursor: string; node: TestPost }[]
+  }>(posts)
 })
 
 it('list query with basic arguments', async () => {

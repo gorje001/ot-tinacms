@@ -2,14 +2,36 @@ query {
   posts: postConnection(
     filter: { author: { author: { name: { eq: "Pedro" } } } }
   ) {
+    ...ConnectionFragment
     edges {
       node {
-        ...SystemInfo
         title
+        created
+        featured
+        categories
         author {
           ... on Document {
             id
           }
+        }
+      }
+    }
+  }
+}
+fragment ConnectionFragment on Connection {
+  totalCount
+  pageInfo {
+    hasPreviousPage
+    hasNextPage
+    startCursor
+    endCursor
+  }
+  ... on DocumentConnection {
+    edges {
+      cursor
+      node {
+        ... on Document {
+          id
         }
       }
     }

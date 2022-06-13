@@ -8,6 +8,26 @@ const generateNamespacedFieldName = (names: string[], suffix: string = '') => {
   return (suffix ? [...names, suffix] : names).map(capitalize).join('')
 }
 
+const connectionFragment = \`fragment ConnectionFragment on Connection {
+  totalCount
+  pageInfo {
+    hasPreviousPage
+    hasNextPage
+    startCursor
+    endCursor
+  }
+  ...on DocumentConnection {
+    edges {
+      cursor
+      node {
+        ...on Document {
+          id
+        }
+      }
+    }
+  }
+}\`
+
 const systemFragment = \`fragment SystemInfo on Document {
   id
   _sys {
@@ -36,6 +56,7 @@ export const query = <
 ): Promise<{ data: C; errors?: object[]; query: string }> => {
   const cb = {}
   let addSystemFragment = false
+  let addConnectionFragment = false
 
   const addField = (field: any, options: any): any => {
     switch (field.type) {
@@ -143,7 +164,6 @@ export const query = <
       default:
         return \`{ eq: "default"}\`
     }
-    return \`{ eq: "ok"}\`
   }
 
   const buildFilters = (collection, args) => {
@@ -214,10 +234,11 @@ export const query = <
     if (typeof collection.fields === 'string') {
       throw new Error('no global templates supported')
     }
+    addConnectionFragment = true
     const f = addFields(collection.fields, args)
     return \`\${docName(collection, args, true)} {
+...ConnectionFragment
 edges { node {
-  ...SystemInfo
   \${f}
 } }
 }\`
@@ -243,6 +264,9 @@ query {\`
   queryString = queryString + \`}\`
   if (addSystemFragment) {
     queryString = queryString + \`\${systemFragment}\`
+  }
+  if (addConnectionFragment) {
+    queryString = queryString + \`\${connectionFragment}\`
   }
 
   return fetch('http://localhost:4001/graphql', {

@@ -193,9 +193,19 @@ function ${collection.name}Connection<
   B extends ${collection.name}References
 >(args?: { first?: number; after?: string; last?: number; before?: string; filter?: ${
     collection.name
-  }Filter, fields?: never; include?: B }): {edges: {node: ${
-    collection.name
-  }Type<B>}[]};
+  }Filter, fields?: never; include?: B }): {
+    totalCount: number
+    pageInfo: {
+      hasPreviousPage: boolean
+      hasNextPage: boolean
+      startCursor: string
+      endCursor: string
+    }
+    edges: {
+      cursor: string
+      node: ${collection.name}Type<B>
+    }[]
+  };
 function ${collection.name}Connection<
   T extends ${collection.name}Fields | undefined,
   B extends ${collection.name}References
@@ -205,7 +215,15 @@ function ${collection.name}Connection<
   fields?: T;
   include?: never;
 }): {
+  totalCount: number
+  pageInfo: {
+    hasPreviousPage: boolean
+    hasNextPage: boolean
+    startCursor: string
+    endCursor: string
+  }
   edges: {
+    cursor: string
     node: {[Key in keyof T]: T[Key] extends true
     ? Key extends keyof ${collection.name}Type
       ? ${collection.name}Type[Key]

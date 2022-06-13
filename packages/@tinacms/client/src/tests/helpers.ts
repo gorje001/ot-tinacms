@@ -27,7 +27,7 @@ export const proxy = <T>(obj: T): T => {
   })
 }
 
-type SystemInfoType = {
+export type SystemInfoType = {
   filename: string
   basename: string
   breadcrumbs: string[]
@@ -41,6 +41,9 @@ type SystemInfoType = {
 
 export const assertString = (val: string) => proxy(val)
 export const assertOptionalString = (val?: string) => proxy(val)
+export const assertOptionalStringArray = (val?: string[]) => proxy(val)
+export const assertOptionalBoolean = (val?: boolean) => proxy(val)
 export const assertObject = (val: object) => proxy(val)
+export const assertMatches = <T>(val: T) => proxy(val)
 export const assertOptionalObject = (val?: object) => proxy(val)
 export const assertSystemInfo = (val: SystemInfoType) => proxy(val)
