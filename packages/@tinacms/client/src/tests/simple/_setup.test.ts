@@ -22,24 +22,31 @@ it('Creates the client', async () => {
         fields: [
           {
             name: 'title',
+            description: 'The title of your post, this field is required.',
             type: 'string',
             required: true,
           },
           {
             name: 'created',
+            description: 'When was this post created',
             type: 'datetime',
           },
           {
             name: 'featured',
+            description: 'This post should be featured in promotional material',
             type: 'boolean',
           },
           {
             name: 'categories',
+            description: 'A list of categories for this post',
             type: 'string',
             list: true,
           },
           {
             name: 'author',
+            description: `## Heads up!
+
+This is actually a _reference_!`,
             type: 'reference',
             collections: ['author'],
           },

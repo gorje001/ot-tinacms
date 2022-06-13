@@ -7,20 +7,33 @@ const schema = {
       fields: [
         {
           name: 'title',
+          description: 'The title of your post, this field is required.',
           type: 'string',
           required: true,
           namespace: ['post', 'title'],
         },
-        { name: 'created', type: 'datetime', namespace: ['post', 'created'] },
-        { name: 'featured', type: 'boolean', namespace: ['post', 'featured'] },
+        {
+          name: 'created',
+          description: 'When was this post created',
+          type: 'datetime',
+          namespace: ['post', 'created'],
+        },
+        {
+          name: 'featured',
+          description: 'This post should be featured in promotional material',
+          type: 'boolean',
+          namespace: ['post', 'featured'],
+        },
         {
           name: 'categories',
+          description: 'A list of categories for this post',
           type: 'string',
           list: true,
           namespace: ['post', 'categories'],
         },
         {
           name: 'author',
+          description: '## Heads up!\n\nThis is actually a _reference_!',
           type: 'reference',
           collections: ['author'],
           namespace: ['post', 'author'],
@@ -39,10 +52,27 @@ const schema = {
 }
 
 type postType<R extends postReferences = {}> = {
+  /**
+   * The title of your post, this field is required.
+   */
   title: string
+  /**
+   * When was this post created
+   */
   created?: string
+  /**
+   * This post should be featured in promotional material
+   */
   featured?: boolean
+  /**
+   * A list of categories for this post
+   */
   categories?: string[]
+  /**
+   * ## Heads up!
+   *
+   * This is actually a _reference_!
+   */
   author?: R['author'] extends true
     ? authorType
     : R['author'] extends { author: authorOptions }

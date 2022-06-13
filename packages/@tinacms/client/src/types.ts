@@ -41,12 +41,19 @@ const buildString = (field, type?: string) => {
     o = '?'
   }
   if (field.list) {
-    return `${field.name}${o}: ${s}[]`
+    return `${formatDescription(field)}${field.name}${o}: ${s}[]`
   }
-  return `${field.name}${o}: ${s}`
+  return `${formatDescription(field)}${field.name}${o}: ${s}`
 }
 const buildNumber = (field) => {
   return buildString(field, 'number')
+}
+const formatDescription = (field) => {
+  return field.description
+    ? `/**
+* ${field.description.split('\n').join('\n * ')}
+*/\n`
+    : ''
 }
 const buildField = (field: TinaField) => {
   switch (field.type) {
@@ -63,9 +70,9 @@ const buildField = (field: TinaField) => {
     case 'rich-text':
       return buildString(field, 'object')
     case 'reference':
-      return `${field.name}${field.required ? '' : '?'}: R["${
-        field.name
-      }"] extends true
+      return `${formatDescription(field)}${field.name}${
+        field.required ? '' : '?'
+      }: R["${field.name}"] extends true
       ? ${field.collections[0]}Type
       : R["${field.name}"] extends { ${field.collections[0]}: ${
         field.collections[0]

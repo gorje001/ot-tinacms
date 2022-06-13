@@ -2,11 +2,7 @@ import {
   format,
   snapPath,
   proxy,
-  assertOptionalString,
-  assertString,
-  assertObject,
   assertOptionalObject,
-  assertSystemInfo,
   assertMatches,
   SystemInfoType,
 } from '../helpers'
