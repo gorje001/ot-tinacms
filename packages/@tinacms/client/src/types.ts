@@ -142,7 +142,23 @@ const buildFields = (
     )
   }
   fieldStrings.push(
-    `_sys: {filename: string, basename: string, breadcrumbs: string[], path: string, relativePath: string, extension: string, template: string, collection: {name: string, format: string}, __typename: string}`
+    `/**
+* Metadata about the file
+*/
+_sys: {
+  filename: string,
+  basename: string,
+  breadcrumbs: string[],
+  path: string,
+  relativePath: string,
+  extension: string,
+  template: string,
+  collection: {
+    name: string,
+    format: string
+  },
+  __typename: string
+}`
   )
   let string = `{${fieldStrings.join(',\n')}}`
   if (field.list) {

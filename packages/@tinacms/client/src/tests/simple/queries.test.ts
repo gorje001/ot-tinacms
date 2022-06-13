@@ -31,12 +31,14 @@ it('simple query', async () => {
   }))
   expect(format(result.query)).toMatchFile(snapPath())
 
-  assertMatches<TestPost>(proxy(result).data.post)
+  const post = proxy(result).data.post
+
+  assertMatches<TestPost>(post)
 
   // @ts-expect-error it does not have access to author properties
-  proxy(result).data.post.author.name
+  post.author.name
   // @ts-expect-error it does not have access to reference system properties
-  proxy(result).data.post.author._sys
+  post.author._sys
 })
 
 it('simple query with the author', async () => {
@@ -55,11 +57,13 @@ it('simple query selected fields', async () => {
   }))
   expect(format(result.query)).toMatchFile(snapPath())
 
-  assertMatches<{ title: string }>(proxy(result).data.post)
+  const post = proxy(result).data.post
+
+  assertMatches<{ title: string }>(post)
   // @ts-expect-error it does not have access to sysem properties
-  proxy(result).data.post._sys
+  post._sys
   // @ts-expect-error it does not have access to other properties
-  proxy(result).data.post.author
+  post.author
 })
 
 it('list query', async () => {

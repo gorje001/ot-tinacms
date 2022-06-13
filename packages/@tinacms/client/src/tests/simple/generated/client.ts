@@ -83,6 +83,9 @@ type postType<R extends postReferences = {}> = {
     : { id: string }
   _collection: 'post'
   _template: 'post'
+  /**
+   * Metadata about the file
+   */
   _sys: {
     filename: string
     basename: string
@@ -91,7 +94,10 @@ type postType<R extends postReferences = {}> = {
     relativePath: string
     extension: string
     template: string
-    collection: { name: string; format: string }
+    collection: {
+      name: string
+      format: string
+    }
     __typename: string
   }
 }
@@ -265,6 +271,9 @@ type authorType<R extends authorReferences = {}> = {
   name?: string
   _collection: 'author'
   _template: 'author'
+  /**
+   * Metadata about the file
+   */
   _sys: {
     filename: string
     basename: string
@@ -273,7 +282,10 @@ type authorType<R extends authorReferences = {}> = {
     relativePath: string
     extension: string
     template: string
-    collection: { name: string; format: string }
+    collection: {
+      name: string
+      format: string
+    }
     __typename: string
   }
 }
