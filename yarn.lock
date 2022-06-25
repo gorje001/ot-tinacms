@@ -6758,6 +6758,7 @@ __metadata:
     jest-file-snapshot: ^0.5.0
     jest-snapshot: ^28.1.1
     prettier: ^2.6.2
+    tsafe: ^0.10.0
     typescript: ^4.3.5
   bin:
     tinacms: bin/tinacms
@@ -32685,6 +32686,13 @@ resolve@^2.0.0-next.3:
     typescript:
       optional: true
   checksum: 78341a27939de565e2754ff65ebb689743c16e3295528089d143c08d91842cf9029c3d6b3c95a9a20854a114a7904329d02c710d63f7ce4dbf671b8a3e560ac1
+  languageName: node
+  linkType: hard
+
+"tsafe@npm:^0.10.0":
+  version: 0.10.0
+  resolution: "tsafe@npm:0.10.0"
+  checksum: 5c6ca750b378b08ff3a9d653b87ae95aa4b40e0b1cae801cbc2d90e21fa2c4697d65e65d09a88b6c45c20608699ca81ba2743e4e1fafd6223bba572c09508ffb
   languageName: node
   linkType: hard
 

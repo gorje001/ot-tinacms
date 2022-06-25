@@ -19,7 +19,10 @@ type TestPost = {
   _template: string
 }
 type TestAuthor = {
-  name?: string
+  name: string
+  bio: {
+    country: string
+  }
   _sys: SystemInfoType
   _collection: string
   _template: string
@@ -139,4 +142,19 @@ it('list query with a filter on a nested reference', async () => {
   if (edge) {
     assertOptionalObject(edge.node.author)
   }
+})
+
+it('query on an object field', async () => {
+  const result = await query(({ author }) => ({
+    author: author({ relativePath: 'author.md' }),
+  }))
+  expect(format(result.query)).toMatchFile(snapPath())
+
+  const author = proxy(result).data.author
+  assertMatches<{
+    name: string
+    bio: {
+      country: string
+    }
+  }>(author)
 })

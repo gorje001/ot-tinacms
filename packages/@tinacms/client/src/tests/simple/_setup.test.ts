@@ -59,6 +59,19 @@ This is actually a _reference_!`,
           {
             name: 'name',
             type: 'string',
+            required: true,
+          },
+          {
+            name: 'bio',
+            type: 'object',
+            required: true,
+            fields: [
+              {
+                required: true,
+                type: 'string',
+                name: 'country',
+              },
+            ],
           },
         ],
       },

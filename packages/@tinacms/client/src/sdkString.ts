@@ -1,10 +1,10 @@
 export const sdkString = `
-const capitalize = (s: string) => {
+const capitalize = (s) => {
   if (typeof s !== 'string') return ''
   return s.charAt(0).toUpperCase() + s.slice(1)
 }
 
-const generateNamespacedFieldName = (names: string[], suffix: string = '') => {
+const generateNamespacedFieldName = (names, suffix = '') => {
   return (suffix ? [...names, suffix] : names).map(capitalize).join('')
 }
 
@@ -58,7 +58,7 @@ export const query = <
   let addSystemFragment = false
   let addConnectionFragment = false
 
-  const addField = (field: any, options: any): any => {
+  const addField = (field, options) => {
     switch (field.type) {
       case 'object':
         if (field.fields) {
@@ -68,7 +68,7 @@ export const query = <
        }\`
         } else {
           return \`\${field.name} { __typename
-            \${field.templates.map((template: any) => {
+            \${field.templates.map((template) => {
               const f = addFields(template.fields, options)
               return \`...on \${generateNamespacedFieldName(template.namespace)} {
                 \${f}
@@ -125,9 +125,9 @@ export const query = <
     }
   }
 
-  const addFields = (fields: any[], options: any): any => {
+  const addFields = (fields, options) => {
     if (options?.fields) {
-      const f: any = []
+      const f = []
       Object.entries(options.fields).forEach(([k, v]) => {
         if (v) {
           const ff = fields.find((field) => field.name === k)
@@ -175,7 +175,7 @@ export const query = <
     filter = filter + "}"
     return filter
   }
-  const docName = (collection: any, args: any, list?: boolean) => {
+  const docName = (collection, args, list) => {
     const name = collection.name
     if (!list) {
       return \`\${name}\${
@@ -208,7 +208,7 @@ export const query = <
     return \`\${name}\${list ? 'Connection' : ''}\${connectionArgs}\`
   }
 
-  const buildCol = (collection: any, args: any) => {
+  const buildCol = (collection, args) => {
     if (collection.templates) {
       throw new Error('no templates supported')
     }
@@ -227,7 +227,7 @@ export const query = <
 \${f}
 }\`
   }
-  const buildColConnection = (collection: any, args: any) => {
+  const buildColConnection = (collection, args) => {
     if (collection.templates) {
       throw new Error('no templates supported')
     }
@@ -291,7 +291,4 @@ query {\`
     }
   })
 }
-
-export type AsyncReturnType<T extends (...args: any) => Promise<any>> =
-  T extends (...args: any) => Promise<infer R> ? R : any
 `

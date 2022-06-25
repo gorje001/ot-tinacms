@@ -9,6 +9,10 @@ query {
       ...SystemInfo
       ... on Author {
         name
+        bio {
+          __typename
+          country
+        }
       }
     }
   }

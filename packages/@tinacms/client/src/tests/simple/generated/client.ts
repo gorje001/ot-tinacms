@@ -1,4 +1,5 @@
 /* eslint-disable */
+// @ts-nocheck
 const schema = {
   collections: [
     {
@@ -44,7 +45,28 @@ const schema = {
     {
       name: 'author',
       path: '',
-      fields: [{ name: 'name', type: 'string', namespace: ['author', 'name'] }],
+      fields: [
+        {
+          name: 'name',
+          type: 'string',
+          required: true,
+          namespace: ['author', 'name'],
+        },
+        {
+          name: 'bio',
+          type: 'object',
+          required: true,
+          fields: [
+            {
+              required: true,
+              type: 'string',
+              name: 'country',
+              namespace: ['author', 'bio', 'country'],
+            },
+          ],
+          namespace: ['author', 'bio'],
+        },
+      ],
       namespace: ['author'],
     },
   ],
@@ -81,11 +103,11 @@ type postType<R extends postReferences = {}> = {
         R['author']['author']['include']
       >
     : { id: string }
-  _collection: 'post'
-  _template: 'post'
   /**
    * Metadata about the file
    */
+  _template: string
+  _collection: string
   _sys: {
     filename: string
     basename: string
@@ -268,12 +290,13 @@ function postConnection<
 }
 
 type authorType<R extends authorReferences = {}> = {
-  name?: string
-  _collection: 'author'
-  _template: 'author'
+  name: string
+  bio: { country: string }
   /**
    * Metadata about the file
    */
+  _template: string
+  _collection: string
   _sys: {
     filename: string
     basename: string
@@ -289,9 +312,12 @@ type authorType<R extends authorReferences = {}> = {
     __typename: string
   }
 }
-type authorFields = { name?: true }
+type authorFields = { name?: true; bio?: boolean | { country?: boolean } }
 
-type authorFilter = { name?: { eq?: string; startsWith?: string } }
+type authorFilter = {
+  name?: { eq?: string; startsWith?: string }
+  bio?: boolean | { country?: boolean }
+}
 
 type authorReferences = {}
 
@@ -446,12 +472,12 @@ type Collection = {
   authorConnection: typeof authorConnection
 }
 
-const capitalize = (s: string) => {
+const capitalize = (s) => {
   if (typeof s !== 'string') return ''
   return s.charAt(0).toUpperCase() + s.slice(1)
 }
 
-const generateNamespacedFieldName = (names: string[], suffix: string = '') => {
+const generateNamespacedFieldName = (names, suffix = '') => {
   return (suffix ? [...names, suffix] : names).map(capitalize).join('')
 }
 
@@ -505,7 +531,7 @@ export const query = <
   let addSystemFragment = false
   let addConnectionFragment = false
 
-  const addField = (field: any, options: any): any => {
+  const addField = (field, options) => {
     switch (field.type) {
       case 'object':
         if (field.fields) {
@@ -515,7 +541,7 @@ export const query = <
        }`
         } else {
           return `${field.name} { __typename
-            ${field.templates.map((template: any) => {
+            ${field.templates.map((template) => {
               const f = addFields(template.fields, options)
               return `...on ${generateNamespacedFieldName(template.namespace)} {
                 ${f}
@@ -572,9 +598,9 @@ export const query = <
     }
   }
 
-  const addFields = (fields: any[], options: any): any => {
+  const addFields = (fields, options) => {
     if (options?.fields) {
-      const f: any = []
+      const f = []
       Object.entries(options.fields).forEach(([k, v]) => {
         if (v) {
           const ff = fields.find((field) => field.name === k)
@@ -626,7 +652,7 @@ export const query = <
     filter = filter + '}'
     return filter
   }
-  const docName = (collection: any, args: any, list?: boolean) => {
+  const docName = (collection, args, list) => {
     const name = collection.name
     if (!list) {
       return `${name}${list ? 'Connection' : ''}(relativePath: "${
@@ -660,7 +686,7 @@ export const query = <
     return `${name}${list ? 'Connection' : ''}${connectionArgs}`
   }
 
-  const buildCol = (collection: any, args: any) => {
+  const buildCol = (collection, args) => {
     if (collection.templates) {
       throw new Error('no templates supported')
     }
@@ -679,7 +705,7 @@ ${maybeSystemInfo}
 ${f}
 }`
   }
-  const buildColConnection = (collection: any, args: any) => {
+  const buildColConnection = (collection, args) => {
     if (collection.templates) {
       throw new Error('no templates supported')
     }
@@ -747,6 +773,3 @@ query {`
       }
     })
 }
-
-export type AsyncReturnType<T extends (...args: any) => Promise<any>> =
-  T extends (...args: any) => Promise<infer R> ? R : any

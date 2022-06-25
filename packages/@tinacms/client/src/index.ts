@@ -28,6 +28,7 @@ export const createClientInner = async (
   const types = await buildTypes(ctx.tinaSchema)
   const res = prettier.format(
     `/* eslint-disable */
+// @ts-nocheck
 ${schemaImportStatement}
 ${types}
 `,

@@ -11,30 +11,47 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import { TinaCollection, TinaField } from '@tinacms/graphql'
+import { TinaCollection } from '@tinacms/graphql'
+import { TinaFieldInner } from '@tinacms/schema-tools'
 
-const buildBoolean = (field) => {
+type TinaField = TinaFieldInner<false>
+
+const buildBoolean = (field: Extract<TinaField, { type: 'boolean' }>) => {
   return buildString(field, 'boolean')
 }
 
-const buildImage = (field) => {
+const buildImage = (field: Extract<TinaField, { type: 'image' }>) => {
   return buildString(field)
 }
-const buildDatetime = (field) => {
+const buildDatetime = (field: Extract<TinaField, { type: 'datetime' }>) => {
   return buildString(field)
 }
-const buildString = (field, type?: string) => {
+const buildNumber = (field: Extract<TinaField, { type: 'number' }>) => {
+  return buildString(field, 'number')
+}
+const buildString = (
+  field:
+    | Extract<TinaField, { type: 'string' }>
+    | Extract<TinaField, { type: 'boolean' }>
+    | Extract<TinaField, { type: 'image' }>
+    | Extract<TinaField, { type: 'datetime' }>
+    | Extract<TinaField, { type: 'rich-text' }>
+    | Extract<TinaField, { type: 'number' }>,
+  type?: string
+) => {
   let s = type || `string`
-  if (field.options) {
-    const values = []
-    field.options.map((option) => {
-      if (typeof option === 'string') {
-        values.push(`"${option}"`)
-      } else {
-        values.push(`"${option.value}"`)
-      }
-    })
-    s = `${values.join(' | ')}`
+  if (field.type !== 'rich-text') {
+    if (field.options) {
+      const values: string[] = []
+      field.options.map((option) => {
+        if (typeof option === 'string') {
+          values.push(`"${option}"`)
+        } else {
+          values.push(`"${option.value}"`)
+        }
+      })
+      s = `${values.join(' | ')}`
+    }
   }
   let o = ''
   if (!field.required) {
@@ -45,10 +62,7 @@ const buildString = (field, type?: string) => {
   }
   return `${formatDescription(field)}${field.name}${o}: ${s}`
 }
-const buildNumber = (field) => {
-  return buildString(field, 'number')
-}
-const formatDescription = (field) => {
+const formatDescription = (field: TinaField) => {
   return field.description
     ? `/**
 * ${field.description.split('\n').join('\n * ')}
@@ -89,12 +103,11 @@ const buildField = (field: TinaField) => {
             if (typeof template === 'string') {
               throw new Error('Global templates not supported')
             }
-            return `${buildFields(
-              // @ts-ignore
-              { required: true },
-              template.fields,
-              `_template: "${template.name}"`
-            )}`
+            return `${buildFields({
+              field: field,
+              fields: template.fields,
+              extra: [`_template: "${template.name}"`],
+            })}`
           })
           .join(' | ')}`
 
@@ -116,35 +129,43 @@ const buildField = (field: TinaField) => {
           o = '?'
         }
 
-        return `${field.name}${o}: ${buildFields(field, field.fields)}`
+        return `${field.name}${o}: ${buildFields({
+          field,
+          fields: field.fields,
+        })}`
       }
     default:
       break
   }
 }
 
-const buildFields = (
-  field: { name: string; list?: boolean; required?: boolean },
-  fields: TinaField[],
-  extra?: string
-) => {
+const buildFields = ({
+  field,
+  fields,
+  extra,
+  includeSys,
+}: {
+  field: { name: string; list?: boolean; required?: boolean }
+  fields: TinaField[]
+  extra?: string[]
+  includeSys?: boolean
+}) => {
   const fieldStrings = []
   fields.forEach((field) => {
     fieldStrings.push(buildField(field))
   })
   if (extra) {
-    fieldStrings.push(extra)
+    extra.forEach((extraItem) => {
+      fieldStrings.push(extraItem)
+    })
   }
-  // FIXME: need to distinguish between collections and objects
-  if (field.name) {
+  if (includeSys) {
     fieldStrings.push(
-      `_collection: "${field.name}", _template: "${field.name}"`
-    )
-  }
-  fieldStrings.push(
-    `/**
+      `/**
 * Metadata about the file
 */
+_template: string
+_collection: string
 _sys: {
   filename: string,
   basename: string,
@@ -159,7 +180,8 @@ _sys: {
   },
   __typename: string
 }`
-  )
+    )
+  }
   let string = `{${fieldStrings.join(',\n')}}`
   if (field.list) {
     string = `${string}[]`
@@ -167,18 +189,19 @@ _sys: {
   return string
 }
 
-export const buildCollectionResponses = (name, fields) => {
-  const stringFields = buildFields(
-    // @ts-ignore
-    { name, required: true, _collections: true },
-    fields
-  )
-  // FIXME: we're faking the old vs new, when this is for real the old type
-  // will come from the older schema version in Git.
-  const string = `type ${name}Type<R extends ${name}References = {}> = ${stringFields}`
-  return string
-}
-
 export const buildTypes2 = (collection: TinaCollection) => {
-  return buildCollectionResponses(collection.name, collection.fields)
+  if (collection.fields) {
+    if (typeof collection.fields === 'string') {
+      throw new Error('Global templates not supported')
+    }
+    const stringFields = buildFields({
+      field: collection,
+      fields: collection.fields,
+      includeSys: true,
+    })
+    // FIXME: we're faking the old vs new, when this is for real the old type
+    // will come from the older schema version in Git.
+    const string = `type ${collection.name}Type<R extends ${collection.name}References = {}> = ${stringFields}`
+    return string
+  }
 }

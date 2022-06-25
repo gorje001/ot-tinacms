@@ -1,0 +1,27 @@
+query {
+  author: author(relativePath: "author.md") {
+    ...SystemInfo
+    name
+    bio {
+      __typename
+      country
+    }
+  }
+}
+fragment SystemInfo on Document {
+  id
+  _sys {
+    filename
+    basename
+    breadcrumbs
+    path
+    relativePath
+    extension
+    template
+    collection {
+      name
+      format
+    }
+  }
+  __typename
+}
