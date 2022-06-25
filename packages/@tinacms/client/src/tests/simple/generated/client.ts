@@ -112,6 +112,7 @@ type postType<R extends postReferences = {}> = {
   /**
    * Metadata about the file
    */
+  id: string
   _template: string
   _collection: string
   _sys: {
@@ -310,6 +311,7 @@ type authorType<R extends authorReferences = {}> = {
   /**
    * Metadata about the file
    */
+  id: string
   _template: string
   _collection: string
   _sys: {
@@ -595,10 +597,9 @@ export const query = <
             }
             let referenceSelections = []
             referencedCollections.map((collection) => {
-              console.log(options.include[field.name][collection.name])
               const f = addFields(
                 collection.fields,
-                options.include[field.name][collection.name]
+                options.include[fieldSlug(field)][collection.name]
               )
               referenceSelections.push(`...on ${generateNamespacedFieldName(
                 collection.namespace

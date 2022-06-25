@@ -1,0 +1,47 @@
+query {
+  author: author(relativePath: "author.md") {
+    ...SystemInfo
+    name
+    bio {
+      country
+      favoritePost {
+        ... on Post {
+          title
+          created
+          featured
+          categories
+          author {
+            ...SystemInfo
+            ... on Author {
+              name
+              bio {
+                country
+                favoritePost {
+                  ... on Document {
+                    id
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+fragment SystemInfo on Document {
+  id
+  _sys {
+    filename
+    basename
+    breadcrumbs
+    path
+    relativePath
+    extension
+    template
+    collection {
+      name
+      format
+    }
+  }
+}

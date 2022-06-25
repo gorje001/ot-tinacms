@@ -9,6 +9,7 @@ import {
 import { query } from './generated/client'
 
 type TestPost = {
+  id: string
   title: string
   created?: string
   featured?: boolean
@@ -19,6 +20,7 @@ type TestPost = {
   _template: string
 }
 type TestAuthor = {
+  id: string
   name: string
   bio: {
     country: string
@@ -182,6 +184,37 @@ it('including a reference nested in an object', async () => {
     bio: {
       country: string
       favoritePost?: TestPost
+    }
+  }>(author)
+
+  // @ts-expect-error
+  author.bio._sys
+})
+
+it('including a reference nested in an object and getting its references', async () => {
+  const result = await query(({ author }) => ({
+    author: author({
+      relativePath: 'author.md',
+      include: {
+        'bio.favoritePost': {
+          post: {
+            include: {
+              author: true,
+            },
+          },
+        },
+      },
+    }),
+  }))
+  expect(format(result.query)).toMatchFile(snapPath())
+
+  const author = proxy(result).data.author
+  assertMatches<{
+    name: string
+    _sys: SystemInfoType
+    bio: {
+      country: string
+      favoritePost?: TestPost & { author?: TestAuthor }
     }
   }>(author)
 

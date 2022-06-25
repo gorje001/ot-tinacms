@@ -168,6 +168,7 @@ const buildFields = ({
       `/**
 * Metadata about the file
 */
+id: string
 _template: string
 _collection: string
 _sys: {

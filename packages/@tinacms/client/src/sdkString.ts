@@ -101,10 +101,9 @@ export const query = <
             }
             let referenceSelections = []
             referencedCollections.map((collection) => {
-              console.log(options.include[field.name][collection.name])
               const f = addFields(
                 collection.fields,
-                options.include[field.name][collection.name]
+                options.include[fieldSlug(field)][collection.name]
               )
               referenceSelections.push(\`...on \${generateNamespacedFieldName(
                 collection.namespace
