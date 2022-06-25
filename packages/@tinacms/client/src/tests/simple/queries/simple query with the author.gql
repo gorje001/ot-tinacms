@@ -10,7 +10,6 @@ query {
       ... on Author {
         name
         bio {
-          __typename
           country
         }
       }
@@ -32,5 +31,4 @@ fragment SystemInfo on Document {
       format
     }
   }
-  __typename
 }

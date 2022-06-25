@@ -3,7 +3,6 @@ query {
     ...SystemInfo
     name
     bio {
-      __typename
       country
     }
   }
@@ -23,5 +22,4 @@ fragment SystemInfo on Document {
       format
     }
   }
-  __typename
 }

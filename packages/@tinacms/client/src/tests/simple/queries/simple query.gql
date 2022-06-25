@@ -27,5 +27,4 @@ fragment SystemInfo on Document {
       format
     }
   }
-  __typename
 }

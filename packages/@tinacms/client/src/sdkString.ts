@@ -43,7 +43,6 @@ const systemFragment = \`fragment SystemInfo on Document {
       format
     }
   }
-  __typename
 }\`
 
 export const query = <
@@ -63,11 +62,11 @@ export const query = <
       case 'object':
         if (field.fields) {
           const f = addFields(field.fields, options)
-          return \`\${field.name} { __typename
+          return \`\${field.name} {
           \${f}
        }\`
         } else {
-          return \`\${field.name} { __typename
+          return \`\${field.name} {
             \${field.templates.map((template) => {
               const f = addFields(template.fields, options)
               return \`...on \${generateNamespacedFieldName(template.namespace)} {
@@ -109,7 +108,6 @@ export const query = <
               }\`)
             })
             return \`\${field.name} {
-              __typename
               \${referenceSelections.join('\\n')}
             }\`
           }
@@ -245,7 +243,6 @@ edges { node {
   }
 
   schema.collections.forEach((collection: any) => {
-    // @ts-ignore
     cb[collection.name] = (args) => {
       return buildCol(collection, args)
     }
@@ -253,7 +250,6 @@ edges { node {
       return buildColConnection(collection, args)
     }
   })
-  // @ts-ignore
   const query = callback(cb)
 
   let queryString = \`

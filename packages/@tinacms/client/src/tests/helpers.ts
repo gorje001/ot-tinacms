@@ -36,7 +36,6 @@ export type SystemInfoType = {
   extension: string
   template: string
   collection: { name: string; format: string }
-  __typename: string
 }
 
 export const assertString = (val: string) => proxy(val)

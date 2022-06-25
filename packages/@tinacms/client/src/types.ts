@@ -178,7 +178,6 @@ _sys: {
     name: string,
     format: string
   },
-  __typename: string
 }`
     )
   }

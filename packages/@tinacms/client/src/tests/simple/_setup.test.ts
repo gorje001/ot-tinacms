@@ -71,6 +71,11 @@ This is actually a _reference_!`,
                 type: 'string',
                 name: 'country',
               },
+              // {
+              //   type: 'reference',
+              //   name: 'favoritePost',
+              //   collections: ['post'],
+              // },
             ],
           },
         ],
@@ -82,4 +87,10 @@ This is actually a _reference_!`,
     `const schema = ${JSON.stringify(addNamespaceToSchema(tinaSchema.config))}`
   )
   expect(client).toMatchFile('./src/tests/simple/generated/client.ts')
+  // const jsClient = await createClientInner(
+  //   { tinaSchema },
+  //   `const schema = ${JSON.stringify(addNamespaceToSchema(tinaSchema.config))}`,
+  //   true
+  // )
+  // expect(jsClient).toMatchFile('./src/tests/simple/generated/client.js')
 })

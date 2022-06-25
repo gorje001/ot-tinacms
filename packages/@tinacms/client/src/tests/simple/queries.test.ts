@@ -153,8 +153,12 @@ it('query on an object field', async () => {
   const author = proxy(result).data.author
   assertMatches<{
     name: string
+    _sys: SystemInfoType
     bio: {
       country: string
     }
   }>(author)
+
+  // @ts-expect-error
+  author.bio._sys
 })
