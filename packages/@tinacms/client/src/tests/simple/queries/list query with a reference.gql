@@ -13,6 +13,11 @@ query {
             name
             bio {
               country
+              favoritePost {
+                ... on Document {
+                  id
+                }
+              }
             }
           }
         }

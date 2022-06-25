@@ -156,6 +156,32 @@ it('query on an object field', async () => {
     _sys: SystemInfoType
     bio: {
       country: string
+      favoritePost?: { id: string }
+    }
+  }>(author)
+
+  // @ts-expect-error
+  author.bio._sys
+})
+
+it('including a reference nested in an object', async () => {
+  const result = await query(({ author }) => ({
+    author: author({
+      relativePath: 'author.md',
+      include: {
+        'bio.favoritePost': true,
+      },
+    }),
+  }))
+  expect(format(result.query)).toMatchFile(snapPath())
+
+  const author = proxy(result).data.author
+  assertMatches<{
+    name: string
+    _sys: SystemInfoType
+    bio: {
+      country: string
+      favoritePost?: TestPost
     }
   }>(author)
 

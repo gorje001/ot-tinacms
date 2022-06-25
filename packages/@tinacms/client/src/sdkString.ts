@@ -45,6 +45,11 @@ const systemFragment = \`fragment SystemInfo on Document {
   }
 }\`
 
+const fieldSlug = (field) => {
+  const namespace = field.namespace.slice(1)
+  return namespace.length > 1 ? namespace.join('.') : field.name
+}
+
 export const query = <
   B,
   A extends keyof Collection,
@@ -77,11 +82,11 @@ export const query = <
       }
       case 'reference':
         if (options?.include) {
-          if (Object.keys(options.include).includes(field.name)) {
+          if (Object.keys(options.include).includes(fieldSlug(field))) {
             const referencedCollections = field.collections.map((col: any) =>
               schema.collections.find((c) => c.name === col)
             )
-            if (options.include[field.name] === true) {
+            if (options.include[fieldSlug(field)] === true) {
               return \`\${field.name} {
                 ...SystemInfo
                 \${referencedCollections.map((collection: any) => {

@@ -5,8 +5,17 @@ query {
     bio {
       country
       favoritePost {
-        ... on Document {
-          id
+        ...SystemInfo
+        ... on Post {
+          title
+          created
+          featured
+          categories
+          author {
+            ... on Document {
+              id
+            }
+          }
         }
       }
     }

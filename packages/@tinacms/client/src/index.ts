@@ -13,7 +13,7 @@ limitations under the License.
 
 import { TinaField } from '@tinacms/graphql'
 import prettier from 'prettier'
-import { TinaSchema } from '@tinacms/schema-tools'
+import { TinaSchema, TinaCloudCollection } from '@tinacms/schema-tools'
 import { sdkString } from './sdkString'
 import { buildTypes2 } from './types'
 
@@ -23,9 +23,10 @@ export const createClient = async (ctx: any) => {
 }
 export const createClientInner = async (
   ctx: { tinaSchema: TinaSchema },
-  schemaImportStatement
+  schemaImportStatement,
+  jsOnly = false
 ) => {
-  const types = await buildTypes(ctx.tinaSchema)
+  const types = await buildTypes(ctx.tinaSchema, jsOnly)
   const res = prettier.format(
     `/* eslint-disable */
 // @ts-nocheck
@@ -104,13 +105,58 @@ const buildFieldTypeStatement = (field) =>
   `${field.name}?: ${buildFieldType(field)}`
 
 const buildReferenceTypeStatement = (f) => {
-  return `${f.name}?: boolean | {${f.collections
+  const namespace = f.namespace.slice(1)
+  return `${
+    namespace.length > 1 ? `"${namespace.join('.')}"` : f.name
+  }?: boolean | {${f.collections
     .map((col) => `${col}: {fields?: ${col}Fields, include?: ${col}References}`)
     .join(', ')}
   }`
 }
 
-const buildCollectionTypes = (collection) => {
+const getReferencesInObject = (
+  field: Extract<TinaField, { type: 'object' }>
+) => {
+  const references: Extract<TinaField, { type: 'reference' }>[] = []
+  if (field.fields) {
+    if (typeof field.fields === 'string') {
+      throw new Error('Global templates not supported')
+    }
+    field.fields.forEach((field) => {
+      if (field.type === 'object') {
+        const nestedReferences = getReferencesInObject(field)
+        nestedReferences.forEach((ref) => {
+          references.push(ref)
+        })
+      }
+      if (field.type === 'reference') {
+        references.push(field)
+      }
+    })
+  }
+  return references
+}
+
+const getReferencesInCollection = (collection: TinaCloudCollection<true>) => {
+  const references: Extract<TinaField, { type: 'reference' }>[] = []
+  if (collection.fields) {
+    collection.fields.forEach((field) => {
+      if (field.type === 'object') {
+        const nestedReferences = getReferencesInObject(field)
+        nestedReferences.forEach((ref) => {
+          references.push(ref)
+        })
+      }
+      if (field.type === 'reference') {
+        references.push(field)
+      }
+    })
+  }
+  return references
+}
+
+const buildCollectionTypes = (collection: TinaCloudCollection<true>) => {
+  const referenceFields = getReferencesInCollection(collection)
   return `
 ${buildTypes2(collection)}
 type ${collection.name}Fields = { ${collection.fields
@@ -121,8 +167,7 @@ type ${collection.name}Filter= { ${collection.fields
     .map(buildFieldFilterStatement)
     .join(', ')}}
 
-type ${collection.name}References = { ${collection.fields
-    .filter((f) => f.type === 'reference')
+type ${collection.name}References = { ${referenceFields
     .map(buildReferenceTypeStatement)
     .join(', ')}}
 

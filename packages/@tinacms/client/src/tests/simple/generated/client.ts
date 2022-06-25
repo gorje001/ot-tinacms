@@ -63,6 +63,12 @@ const schema = {
               name: 'country',
               namespace: ['author', 'bio', 'country'],
             },
+            {
+              type: 'reference',
+              name: 'favoritePost',
+              collections: ['post'],
+              namespace: ['author', 'bio', 'favoritePost'],
+            },
           ],
           namespace: ['author', 'bio'],
         },
@@ -290,7 +296,17 @@ function postConnection<
 
 type authorType<R extends authorReferences = {}> = {
   name: string
-  bio: { country: string }
+  bio: {
+    country: string
+    favoritePost?: R['bio.favoritePost'] extends true
+      ? postType
+      : R['bio.favoritePost'] extends { post: postOptions }
+      ? postReturn<
+          R['bio.favoritePost']['post']['fields'],
+          R['bio.favoritePost']['post']['include']
+        >
+      : { id: string }
+  }
   /**
    * Metadata about the file
    */
@@ -310,14 +326,21 @@ type authorType<R extends authorReferences = {}> = {
     }
   }
 }
-type authorFields = { name?: true; bio?: boolean | { country?: boolean } }
+type authorFields = {
+  name?: true
+  bio?: boolean | { country?: boolean; favoritePost?: boolean }
+}
 
 type authorFilter = {
   name?: { eq?: string; startsWith?: string }
-  bio?: boolean | { country?: boolean }
+  bio?: boolean | { country?: boolean; favoritePost?: boolean }
 }
 
-type authorReferences = {}
+type authorReferences = {
+  'bio.favoritePost'?:
+    | boolean
+    | { post: { fields?: postFields; include?: postReferences } }
+}
 
 type authorOptions = {
   fields?: authorFields
@@ -516,6 +539,11 @@ const systemFragment = `fragment SystemInfo on Document {
   }
 }`
 
+const fieldSlug = (field) => {
+  const namespace = field.namespace.slice(1)
+  return namespace.length > 1 ? namespace.join('.') : field.name
+}
+
 export const query = <
   B,
   A extends keyof Collection,
@@ -548,11 +576,11 @@ export const query = <
         }
       case 'reference':
         if (options?.include) {
-          if (Object.keys(options.include).includes(field.name)) {
+          if (Object.keys(options.include).includes(fieldSlug(field))) {
             const referencedCollections = field.collections.map((col: any) =>
               schema.collections.find((c) => c.name === col)
             )
-            if (options.include[field.name] === true) {
+            if (options.include[fieldSlug(field)] === true) {
               return `${field.name} {
                 ...SystemInfo
                 ${referencedCollections.map((collection: any) => {

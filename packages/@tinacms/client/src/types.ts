@@ -14,7 +14,7 @@ limitations under the License.
 import { TinaCollection } from '@tinacms/graphql'
 import { TinaFieldInner } from '@tinacms/schema-tools'
 
-type TinaField = TinaFieldInner<false>
+type TinaField = TinaFieldInner<true>
 
 const buildBoolean = (field: Extract<TinaField, { type: 'boolean' }>) => {
   return buildString(field, 'boolean')
@@ -86,14 +86,18 @@ const buildField = (field: TinaField) => {
     case 'reference':
       return `${formatDescription(field)}${field.name}${
         field.required ? '' : '?'
-      }: R["${field.name}"] extends true
+      }: R["${field.namespace.slice(1).join('.')}"] extends true
       ? ${field.collections[0]}Type
-      : R["${field.name}"] extends { ${field.collections[0]}: ${
+      : R["${field.namespace.slice(1).join('.')}"] extends { ${
         field.collections[0]
-      }Options }
+      }: ${field.collections[0]}Options }
       ? ${field.collections[0]}Return<
-        R["${field.name}"]["${field.collections[0]}"]["fields"],
-        R["${field.name}"]["${field.collections[0]}"]["include"]
+        R["${field.namespace.slice(1).join('.')}"]["${
+        field.collections[0]
+      }"]["fields"],
+        R["${field.namespace.slice(1).join('.')}"]["${
+        field.collections[0]
+      }"]["include"]
       >
       : { id: string }`
     case 'object':
