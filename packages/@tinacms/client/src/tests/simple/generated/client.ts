@@ -69,6 +69,25 @@ const schema = {
               collections: ['post'],
               namespace: ['author', 'bio', 'favoritePost'],
             },
+            {
+              type: 'object',
+              name: 'socialMedia',
+              list: true,
+              fields: [
+                {
+                  type: 'string',
+                  name: 'platform',
+                  options: ['twitter', 'facebook', 'instagram'],
+                  namespace: ['author', 'bio', 'socialMedia', 'platform'],
+                },
+                {
+                  type: 'string',
+                  name: 'handle',
+                  namespace: ['author', 'bio', 'socialMedia', 'handle'],
+                },
+              ],
+              namespace: ['author', 'bio', 'socialMedia'],
+            },
           ],
           namespace: ['author', 'bio'],
         },
@@ -307,6 +326,10 @@ type authorType<R extends authorReferences = {}> = {
           R['bio.favoritePost']['post']['include']
         >
       : { id: string }
+    socialMedia?: {
+      platform?: 'twitter' | 'facebook' | 'instagram'
+      handle?: string
+    }[]
   }
   /**
    * Metadata about the file
@@ -330,12 +353,16 @@ type authorType<R extends authorReferences = {}> = {
 }
 type authorFields = {
   name?: true
-  bio?: boolean | { country?: boolean; favoritePost?: boolean }
+  bio?:
+    | boolean
+    | { country?: boolean; favoritePost?: boolean; socialMedia?: boolean }
 }
 
 type authorFilter = {
   name?: { eq?: string; startsWith?: string }
-  bio?: boolean | { country?: boolean; favoritePost?: boolean }
+  bio?:
+    | boolean
+    | { country?: boolean; favoritePost?: boolean; socialMedia?: boolean }
 }
 
 type authorReferences = {

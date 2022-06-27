@@ -18,6 +18,10 @@ query {
                   id
                 }
               }
+              socialMedia {
+                platform
+                handle
+              }
             }
           }
         }

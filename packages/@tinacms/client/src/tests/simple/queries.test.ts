@@ -24,6 +24,10 @@ type TestAuthor = {
   name: string
   bio: {
     country: string
+    socialMedia?: {
+      platform?: string
+      handle?: string
+    }[]
   }
   _sys: SystemInfoType
   _collection: string
@@ -153,14 +157,7 @@ it('query on an object field', async () => {
   expect(format(result.query)).toMatchFile(snapPath())
 
   const author = proxy(result).data.author
-  assertMatches<{
-    name: string
-    _sys: SystemInfoType
-    bio: {
-      country: string
-      favoritePost?: { id: string }
-    }
-  }>(author)
+  assertMatches<TestAuthor>(author)
 
   // @ts-expect-error
   author.bio._sys

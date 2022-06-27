@@ -76,6 +76,22 @@ This is actually a _reference_!`,
                 name: 'favoritePost',
                 collections: ['post'],
               },
+              {
+                type: 'object',
+                name: 'socialMedia',
+                list: true,
+                fields: [
+                  {
+                    type: 'string',
+                    name: 'platform',
+                    options: ['twitter', 'facebook', 'instagram'],
+                  },
+                  {
+                    type: 'string',
+                    name: 'handle',
+                  },
+                ],
+              },
             ],
           },
         ],
