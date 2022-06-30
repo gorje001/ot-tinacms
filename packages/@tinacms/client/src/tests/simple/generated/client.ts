@@ -188,18 +188,23 @@ type postReturn<
     }
   : postType<B>
 
-function post<
-  T extends postFields | undefined,
-  B extends postReferences
->(args: { relativePath: string; fields?: never; include?: B }): postType<B>
-function post<
-  T extends postFields | undefined,
-  B extends postReferences
->(args: {
+type postArgsForInclude<B> = {
+  relativePath: string
+  fields?: never
+  include?: B
+}
+type postArgsForFields<T> = {
   relativePath: string
   fields?: T
   include?: never
-}): {
+}
+
+function post<T extends postFields | undefined, B extends postReferences>(
+  args: postArgsForInclude<B>
+): postType<B>
+function post<T extends postFields | undefined, B extends postReferences>(
+  args: postArgsForFields<T>
+): {
   [Key in keyof T]: T[Key] extends true
     ? Key extends keyof postType
       ? postType[Key]
@@ -207,17 +212,7 @@ function post<
     : never
 }
 function post<T extends postFields | undefined, B extends postReferences>(
-  args:
-    | {
-        relativePath: string
-        fields?: T
-        include?: never
-      }
-    | {
-        relativePath: string
-        fields?: never
-        include?: B
-      }
+  args: postArgsForInclude<B> | postArgsForFields<T>
 ):
   | postType<B>
   | {
@@ -389,18 +384,23 @@ type authorReturn<
     }
   : authorType<B>
 
-function author<
-  T extends authorFields | undefined,
-  B extends authorReferences
->(args: { relativePath: string; fields?: never; include?: B }): authorType<B>
-function author<
-  T extends authorFields | undefined,
-  B extends authorReferences
->(args: {
+type authorArgsForInclude<B> = {
+  relativePath: string
+  fields?: never
+  include?: B
+}
+type authorArgsForFields<T> = {
   relativePath: string
   fields?: T
   include?: never
-}): {
+}
+
+function author<T extends authorFields | undefined, B extends authorReferences>(
+  args: authorArgsForInclude<B>
+): authorType<B>
+function author<T extends authorFields | undefined, B extends authorReferences>(
+  args: authorArgsForFields<T>
+): {
   [Key in keyof T]: T[Key] extends true
     ? Key extends keyof authorType
       ? authorType[Key]
@@ -408,17 +408,7 @@ function author<
     : never
 }
 function author<T extends authorFields | undefined, B extends authorReferences>(
-  args:
-    | {
-        relativePath: string
-        fields?: T
-        include?: never
-      }
-    | {
-        relativePath: string
-        fields?: never
-        include?: B
-      }
+  args: authorArgsForInclude<B> | authorArgsForFields<T>
 ):
   | authorType<B>
   | {

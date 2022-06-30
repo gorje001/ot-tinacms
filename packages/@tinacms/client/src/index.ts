@@ -105,10 +105,10 @@ const buildFieldType = (field: TinaField) => {
   }
 }
 
-const buildFieldFilterStatement = (field: TinaField) =>
+export const buildFieldFilterStatement = (field: TinaField) =>
   `${field.name}?: ${buildFieldFilter(field)}`
 
-const buildFieldTypeStatement = (field: TinaField) =>
+export const buildFieldTypeStatement = (field: TinaField) =>
   `${field.name}?: ${buildFieldType(field)}`
 
 const buildReferenceTypeStatement = (
@@ -164,54 +164,74 @@ const getReferencesInCollection = (collection: Collection) => {
   return references
 }
 
-const buildCollectionTypes = (collection: Collection) => {
-  const referenceFields = getReferencesInCollection(collection)
-  return `
-${buildTypes2(collection)}
-type ${collection.name}Fields = { ${collection.fields
+export const buildCollectionFieldsStatement = (collection: Collection) => {
+  return `type ${collection.name}Fields = { ${collection.fields
     .map(buildFieldTypeStatement)
     .join(', ')} }
-
-type ${collection.name}Filter= { ${collection.fields
+    `
+}
+export const buildCollectionFilterStatement = (collection: Collection) => {
+  return `type ${collection.name}Filter= { ${collection.fields
     .map(buildFieldFilterStatement)
     .join(', ')}}
-
-type ${collection.name}References = { ${referenceFields
+    `
+}
+export const buildCollectionReferenceStatement = (collection: Collection) => {
+  const referenceFields = getReferencesInCollection(collection)
+  return `type ${collection.name}References = { ${referenceFields
     .map(buildReferenceTypeStatement)
     .join(', ')}}
-
-type ${collection.name}Options= {
-  fields?: ${collection.name}Fields;
-  include?: ${collection.name}References;
+`
+}
+export const buildCollectionOptionsStatement = (collection: Collection) => {
+  return `type ${collection.name}Options= {
+    fields?: ${collection.name}Fields;
+    include?: ${collection.name}References;
+  }
+`
+}
+export const buildCollectionReturnStatement = (collection: Collection) => {
+  return `type ${collection.name}Return<
+    T extends ${collection.name}Fields | undefined,
+    B extends ${collection.name}References
+  > = T extends object
+    ? {
+        [Key in keyof T]: T[Key] extends true
+          ? Key extends keyof ${collection.name}Type
+            ? ${collection.name}Type[Key]
+            : never
+          : never;
+      }
+    : ${collection.name}Type<B>;
+  `
 }
 
-type ${collection.name}Return<
-  T extends ${collection.name}Fields | undefined,
-  B extends ${collection.name}References
-> = T extends object
-  ? {
-      [Key in keyof T]: T[Key] extends true
-        ? Key extends keyof ${collection.name}Type
-          ? ${collection.name}Type[Key]
-          : never
-        : never;
-    }
-  : ${collection.name}Type<B>;
+const buildCollectionTypes = (collection: Collection) => {
+  return `
+${buildTypes2(collection)}
+${buildCollectionFieldsStatement(collection)}
+${buildCollectionFilterStatement(collection)}
+${buildCollectionReferenceStatement(collection)}
+${buildCollectionOptionsStatement(collection)}
+${buildCollectionReturnStatement(collection)}
 
-function ${collection.name}<
-  T extends ${collection.name}Fields | undefined,
-  B extends ${collection.name}References
->(args: { relativePath: string; fields?: never; include?: B }): ${
+type ${
     collection.name
-  }Type<B>;
-function ${collection.name}<
-  T extends ${collection.name}Fields | undefined,
-  B extends ${collection.name}References
->(args: {
+  }ArgsForInclude<B> = { relativePath: string; fields?: never; include?: B }
+type ${collection.name}ArgsForFields<T> = {
   relativePath: string;
   fields?: T;
   include?: never;
-}): {
+}
+
+function ${collection.name}<
+  T extends ${collection.name}Fields | undefined,
+  B extends ${collection.name}References
+>(args: ${collection.name}ArgsForInclude<B>): ${collection.name}Type<B>;
+function ${collection.name}<
+  T extends ${collection.name}Fields | undefined,
+  B extends ${collection.name}References
+>(args: ${collection.name}ArgsForFields<T>): {
   [Key in keyof T]: T[Key] extends true
     ? Key extends keyof ${collection.name}Type
       ? ${collection.name}Type[Key]
@@ -221,17 +241,7 @@ function ${collection.name}<
 function ${collection.name}<T extends ${
     collection.name
   }Fields | undefined, B extends ${collection.name}References>(
-  args:
-    | {
-        relativePath: string;
-        fields?: T;
-        include?: never;
-      }
-    | {
-        relativePath: string;
-        fields?: never;
-        include?: B;
-      }
+  args: ${collection.name}ArgsForInclude<B> | ${collection.name}ArgsForFields<T>
 ):
   | ${collection.name}Type<B>
   | {
