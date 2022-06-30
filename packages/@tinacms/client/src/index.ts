@@ -11,11 +11,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import { TinaField } from '@tinacms/graphql'
 import prettier from 'prettier'
-import { TinaSchema, TinaCloudCollection } from '@tinacms/schema-tools'
+import {
+  TinaSchema,
+  TinaCloudCollection,
+  TinaFieldEnriched,
+} from '@tinacms/schema-tools'
 import { sdkString } from './sdkString'
 import { buildTypes2 } from './types'
+
+type TinaField = TinaFieldEnriched
+
+type Collection = TinaCloudCollection<true>
 
 export const createClient = async (ctx: any) => {
   const schemaImportStatement = `import schema from "./__generated__/_schema.json"`
@@ -23,7 +30,7 @@ export const createClient = async (ctx: any) => {
 }
 export const createClientInner = async (
   ctx: { tinaSchema: TinaSchema },
-  schemaImportStatement,
+  schemaImportStatement: string,
   jsOnly = false
 ) => {
   const types = await buildTypes(ctx.tinaSchema, jsOnly)
@@ -42,7 +49,7 @@ ${types}
 const buildFieldFilter = (field: TinaField) => {
   switch (field.type) {
     case 'object':
-      const opts = []
+      const opts: string[] = []
       if (field.fields) {
         if (typeof field.fields === 'string') {
           throw new Error('Global templates not supported')
@@ -74,7 +81,7 @@ const buildFieldFilter = (field: TinaField) => {
 const buildFieldType = (field: TinaField) => {
   switch (field.type) {
     case 'object':
-      const opts = []
+      const opts: string[] = []
       if (field.fields) {
         if (typeof field.fields === 'string') {
           throw new Error('Global templates not supported')
@@ -98,13 +105,15 @@ const buildFieldType = (field: TinaField) => {
   }
 }
 
-const buildFieldFilterStatement = (field) =>
+const buildFieldFilterStatement = (field: TinaField) =>
   `${field.name}?: ${buildFieldFilter(field)}`
 
-const buildFieldTypeStatement = (field) =>
+const buildFieldTypeStatement = (field: TinaField) =>
   `${field.name}?: ${buildFieldType(field)}`
 
-const buildReferenceTypeStatement = (f) => {
+const buildReferenceTypeStatement = (
+  f: Extract<TinaField, { type: 'reference' }>
+) => {
   const namespace = f.namespace.slice(1)
   return `${
     namespace.length > 1 ? `"${namespace.join('.')}"` : f.name
@@ -137,7 +146,7 @@ const getReferencesInObject = (
   return references
 }
 
-const getReferencesInCollection = (collection: TinaCloudCollection<true>) => {
+const getReferencesInCollection = (collection: Collection) => {
   const references: Extract<TinaField, { type: 'reference' }>[] = []
   if (collection.fields) {
     collection.fields.forEach((field) => {
@@ -155,7 +164,7 @@ const getReferencesInCollection = (collection: TinaCloudCollection<true>) => {
   return references
 }
 
-const buildCollectionTypes = (collection: TinaCloudCollection<true>) => {
+const buildCollectionTypes = (collection: Collection) => {
   const referenceFields = getReferencesInCollection(collection)
   return `
 ${buildTypes2(collection)}
@@ -308,9 +317,9 @@ function ${collection.name}Connection<T extends ${
 }`
 }
 
-export const buildTypes = (tinaSchema: TinaSchema) => {
+export const buildTypes = (tinaSchema: TinaSchema, jsOnly?: boolean) => {
   const collections = tinaSchema.getCollections()
-  const collectionTypes = []
+  const collectionTypes: string[] = []
   tinaSchema.getCollections().map((collection) => {
     collectionTypes.push(buildCollectionTypes(collection))
   })
