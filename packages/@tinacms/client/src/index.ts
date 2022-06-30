@@ -223,6 +223,13 @@ type ${collection.name}ArgsForFields<T> = {
   fields?: T;
   include?: never;
 }
+type ${collection.name}FieldsArgsType<T> = {
+  [Key in keyof T]: T[Key] extends true
+    ? Key extends keyof ${collection.name}Type
+      ? ${collection.name}Type[Key]
+      : never
+    : never;
+}
 
 function ${collection.name}<
   T extends ${collection.name}Fields | undefined,
@@ -231,26 +238,14 @@ function ${collection.name}<
 function ${collection.name}<
   T extends ${collection.name}Fields | undefined,
   B extends ${collection.name}References
->(args: ${collection.name}ArgsForFields<T>): {
-  [Key in keyof T]: T[Key] extends true
-    ? Key extends keyof ${collection.name}Type
-      ? ${collection.name}Type[Key]
-      : never
-    : never;
-};
+>(args: ${collection.name}ArgsForFields<T>): ${collection.name}FieldsArgsType<T>
 function ${collection.name}<T extends ${
     collection.name
   }Fields | undefined, B extends ${collection.name}References>(
   args: ${collection.name}ArgsForInclude<B> | ${collection.name}ArgsForFields<T>
 ):
   | ${collection.name}Type<B>
-  | {
-      [Key in keyof T]: T[Key] extends true
-        ? Key extends keyof ${collection.name}Type
-          ? ${collection.name}Type[Key]
-          : never
-        : never;
-    } {
+  | ${collection.name}FieldsArgsType<T> {
   return {} as any;
 }
 function ${collection.name}Connection<
@@ -289,11 +284,7 @@ function ${collection.name}Connection<
   }
   edges: {
     cursor: string
-    node: {[Key in keyof T]: T[Key] extends true
-    ? Key extends keyof ${collection.name}Type
-      ? ${collection.name}Type[Key]
-      : never
-    : never}
+    node: ${collection.name}FieldsArgsType<T>
   }[]
 };
 function ${collection.name}Connection<T extends ${
@@ -314,13 +305,7 @@ function ${collection.name}Connection<T extends ${
 {
   edges: {
     node:  | ${collection.name}Type<B>
-  | {
-      [Key in keyof T]: T[Key] extends true
-        ? Key extends keyof ${collection.name}Type
-          ? ${collection.name}Type[Key]
-          : never
-        : never;
-    }
+           | ${collection.name}FieldsArgsType<T>
   }[]
 } {
   return {} as any;

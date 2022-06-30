@@ -198,30 +198,23 @@ type postArgsForFields<T> = {
   fields?: T
   include?: never
 }
-
-function post<T extends postFields | undefined, B extends postReferences>(
-  args: postArgsForInclude<B>
-): postType<B>
-function post<T extends postFields | undefined, B extends postReferences>(
-  args: postArgsForFields<T>
-): {
+type postFieldsArgsType<T> = {
   [Key in keyof T]: T[Key] extends true
     ? Key extends keyof postType
       ? postType[Key]
       : never
     : never
 }
+
+function post<T extends postFields | undefined, B extends postReferences>(
+  args: postArgsForInclude<B>
+): postType<B>
+function post<T extends postFields | undefined, B extends postReferences>(
+  args: postArgsForFields<T>
+): postFieldsArgsType<T>
 function post<T extends postFields | undefined, B extends postReferences>(
   args: postArgsForInclude<B> | postArgsForFields<T>
-):
-  | postType<B>
-  | {
-      [Key in keyof T]: T[Key] extends true
-        ? Key extends keyof postType
-          ? postType[Key]
-          : never
-        : never
-    } {
+): postType<B> | postFieldsArgsType<T> {
   return {} as any
 }
 function postConnection<
@@ -269,13 +262,7 @@ function postConnection<
   }
   edges: {
     cursor: string
-    node: {
-      [Key in keyof T]: T[Key] extends true
-        ? Key extends keyof postType
-          ? postType[Key]
-          : never
-        : never
-    }
+    node: postFieldsArgsType<T>
   }[]
 }
 function postConnection<
@@ -295,15 +282,7 @@ function postConnection<
       }
 ): {
   edges: {
-    node:
-      | postType<B>
-      | {
-          [Key in keyof T]: T[Key] extends true
-            ? Key extends keyof postType
-              ? postType[Key]
-              : never
-            : never
-        }
+    node: postType<B> | postFieldsArgsType<T>
   }[]
 } {
   return {} as any
@@ -394,30 +373,23 @@ type authorArgsForFields<T> = {
   fields?: T
   include?: never
 }
-
-function author<T extends authorFields | undefined, B extends authorReferences>(
-  args: authorArgsForInclude<B>
-): authorType<B>
-function author<T extends authorFields | undefined, B extends authorReferences>(
-  args: authorArgsForFields<T>
-): {
+type authorFieldsArgsType<T> = {
   [Key in keyof T]: T[Key] extends true
     ? Key extends keyof authorType
       ? authorType[Key]
       : never
     : never
 }
+
+function author<T extends authorFields | undefined, B extends authorReferences>(
+  args: authorArgsForInclude<B>
+): authorType<B>
+function author<T extends authorFields | undefined, B extends authorReferences>(
+  args: authorArgsForFields<T>
+): authorFieldsArgsType<T>
 function author<T extends authorFields | undefined, B extends authorReferences>(
   args: authorArgsForInclude<B> | authorArgsForFields<T>
-):
-  | authorType<B>
-  | {
-      [Key in keyof T]: T[Key] extends true
-        ? Key extends keyof authorType
-          ? authorType[Key]
-          : never
-        : never
-    } {
+): authorType<B> | authorFieldsArgsType<T> {
   return {} as any
 }
 function authorConnection<
@@ -465,13 +437,7 @@ function authorConnection<
   }
   edges: {
     cursor: string
-    node: {
-      [Key in keyof T]: T[Key] extends true
-        ? Key extends keyof authorType
-          ? authorType[Key]
-          : never
-        : never
-    }
+    node: authorFieldsArgsType<T>
   }[]
 }
 function authorConnection<
@@ -491,15 +457,7 @@ function authorConnection<
       }
 ): {
   edges: {
-    node:
-      | authorType<B>
-      | {
-          [Key in keyof T]: T[Key] extends true
-            ? Key extends keyof authorType
-              ? authorType[Key]
-              : never
-            : never
-        }
+    node: authorType<B> | authorFieldsArgsType<T>
   }[]
 } {
   return {} as any
