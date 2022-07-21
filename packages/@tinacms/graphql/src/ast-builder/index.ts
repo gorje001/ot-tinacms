@@ -753,6 +753,42 @@ export const astBuilder = {
         },
         directives: [],
       },
+      {
+        kind: 'VariableDefinition',
+        variable: {
+          kind: 'Variable',
+          name: {
+            kind: 'Name',
+            value: 'limit',
+          },
+        },
+        type: {
+          kind: 'NamedType',
+          name: {
+            kind: 'Name',
+            value: 'Float',
+          },
+        },
+        directives: [],
+      },
+      {
+        kind: 'VariableDefinition',
+        variable: {
+          kind: 'Variable',
+          name: {
+            kind: 'Name',
+            value: 'offset',
+          },
+        },
+        type: {
+          kind: 'NamedType',
+          name: {
+            kind: 'Name',
+            value: 'Float',
+          },
+        },
+        directives: [],
+      },
     ]
     const queryArguments: ArgumentNode[] = [
       {
@@ -822,6 +858,34 @@ export const astBuilder = {
           name: {
             kind: 'Name',
             value: 'sort',
+          },
+        },
+      },
+      {
+        kind: 'Argument',
+        name: {
+          kind: 'Name',
+          value: 'limit',
+        },
+        value: {
+          kind: 'Variable',
+          name: {
+            kind: 'Name',
+            value: 'limit',
+          },
+        },
+      },
+      {
+        kind: 'Argument',
+        name: {
+          kind: 'Name',
+          value: 'offset',
+        },
+        value: {
+          kind: 'Variable',
+          name: {
+            kind: 'Name',
+            value: 'offset',
           },
         },
       },

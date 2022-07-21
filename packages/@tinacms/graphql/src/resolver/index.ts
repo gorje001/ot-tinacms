@@ -585,6 +585,7 @@ export class Resolver {
   }) => {
     let edges
     let pageInfo
+    let totalCount
 
     // See if we are using the data layer
     const useDataLayer = Boolean(
@@ -633,12 +634,15 @@ export class Resolver {
         last: args.last as number,
         before: args.before as string,
         after: args.after as string,
+        limit: args.limit as number,
+        offset: args.offset as number,
       }
 
       const result = await this.database.query(
         queryOptions,
         hydrator ? hydrator : this.getDocument
       )
+      totalCount = await this.database.count(queryOptions)
       edges = result.edges
       pageInfo = result.pageInfo
     } else {
@@ -648,10 +652,11 @@ export class Resolver {
       ).map((document) => ({
         node: document,
       }))
+      totalCount = edges.length
     }
 
     return {
-      totalCount: edges.length,
+      totalCount,
       edges,
       pageInfo: pageInfo || {
         hasPreviousPage: false,

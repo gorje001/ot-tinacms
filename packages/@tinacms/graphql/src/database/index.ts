@@ -86,6 +86,10 @@ export type QueryOptions = {
   after?: string
   /* specify cursor to end results at */
   before?: string
+  /* limits result set */
+  limit?: number
+  /* offset into result set */
+  offset?: number
 }
 
 const defaultStatusCallback: IndexStatusCallback = () => Promise.resolve()
@@ -433,9 +437,35 @@ export class Database {
     return true
   }
 
+  public count = async (queryOptions: QueryOptions): Promise<number> => {
+    const { sort, collection, filterChain } = queryOptions
+    const storeQueryOptions: StoreQueryOptions = {
+      sort,
+      collection,
+      filterChain,
+    }
+    const indexDefinitions = await this.getIndexDefinitions()
+    storeQueryOptions.indexDefinitions =
+      indexDefinitions?.[queryOptions.collection]
+    if (!storeQueryOptions.indexDefinitions) {
+      throw new Error(
+        `No indexDefinitions for collection ${queryOptions.collection}`
+      )
+    }
+    return this.store.count(storeQueryOptions)
+  }
+
   public query = async (queryOptions: QueryOptions, hydrator) => {
-    const { first, after, last, before, sort, collection, filterChain } =
-      queryOptions
+    const {
+      first,
+      after,
+      last,
+      before,
+      sort,
+      collection,
+      filterChain,
+      offset,
+    } = queryOptions
     const storeQueryOptions: StoreQueryOptions = {
       sort,
       collection,
@@ -447,7 +477,10 @@ export class Database {
     } else if (last) {
       storeQueryOptions.limit = last
     } else {
-      storeQueryOptions.limit = 10
+      storeQueryOptions.limit = queryOptions.limit || 10
+      if (offset) {
+        storeQueryOptions.offset = offset
+      }
     }
 
     if (after) {

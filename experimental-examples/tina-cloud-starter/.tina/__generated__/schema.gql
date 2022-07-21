@@ -49,13 +49,13 @@ type Query {
   node(id: String): Node!
   document(collection: String, relativePath: String): DocumentNode!
   posts(relativePath: String): Posts!
-  postsConnection(before: String, after: String, first: Float, last: Float, sort: String, filter: PostsFilter): PostsConnection!
+  postsConnection(before: String, after: String, first: Float, last: Float, sort: String, limit: Float, offset: Float, filter: PostsFilter): PostsConnection!
   global(relativePath: String): Global!
-  globalConnection(before: String, after: String, first: Float, last: Float, sort: String, filter: GlobalFilter): GlobalConnection!
+  globalConnection(before: String, after: String, first: Float, last: Float, sort: String, limit: Float, offset: Float, filter: GlobalFilter): GlobalConnection!
   authors(relativePath: String): Authors!
-  authorsConnection(before: String, after: String, first: Float, last: Float, sort: String, filter: AuthorsFilter): AuthorsConnection!
+  authorsConnection(before: String, after: String, first: Float, last: Float, sort: String, limit: Float, offset: Float, filter: AuthorsFilter): AuthorsConnection!
   pages(relativePath: String): Pages!
-  pagesConnection(before: String, after: String, first: Float, last: Float, sort: String, filter: PagesFilter): PagesConnection!
+  pagesConnection(before: String, after: String, first: Float, last: Float, sort: String, limit: Float, offset: Float, filter: PagesFilter): PagesConnection!
 }
 
 input DocumentFilter {
@@ -85,7 +85,7 @@ type Collection {
   matches: String
   templates: [JSON]
   fields: [JSON]
-  documents(before: String, after: String, first: Float, last: Float, sort: String, filter: DocumentFilter): DocumentConnection!
+  documents(before: String, after: String, first: Float, last: Float, sort: String, limit: Float, offset: Float, filter: DocumentFilter): DocumentConnection!
 }
 
 union DocumentNode = Posts | Global | Authors | Pages

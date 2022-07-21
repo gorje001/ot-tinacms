@@ -58,6 +58,81 @@ export class LevelStore implements Store {
     }
   }
 
+  public async count(queryOptions: StoreQueryOptions): Promise<number> {
+    const {
+      filterChain: rawFilterChain,
+      sort = DEFAULT_COLLECTION_SORT_KEY,
+      collection,
+      indexDefinitions,
+      ...query
+    } = queryOptions
+
+    const filterChain = coerceFilterChainOperands(rawFilterChain, escapeStr)
+    const indexDefinition = indexDefinitions?.[sort] as
+      | IndexDefinition
+      | undefined
+    const filterSuffixes =
+      indexDefinition && makeFilterSuffixes(filterChain, indexDefinition)
+    const indexPrefix = indexDefinition
+      ? `${collection}${INDEX_KEY_FIELD_SEPARATOR}${sort}`
+      : `${defaultPrefix}${INDEX_KEY_FIELD_SEPARATOR}`
+
+    if (!query.gt && !query.gte) {
+      query.gte = filterSuffixes?.left
+        ? `${indexPrefix}${INDEX_KEY_FIELD_SEPARATOR}${filterSuffixes.left}`
+        : indexPrefix
+    }
+
+    if (!query.lt && !query.lte) {
+      query.lte = filterSuffixes?.right
+        ? `${indexPrefix}${INDEX_KEY_FIELD_SEPARATOR}${filterSuffixes.right}\xFF`
+        : `${indexPrefix}\xFF`
+    }
+
+    const fieldsPattern = indexDefinition?.fields?.length
+      ? `${indexDefinition.fields
+          .map((p) => `${INDEX_KEY_FIELD_SEPARATOR}(?<${p.name}>.+)`)
+          .join('')}${INDEX_KEY_FIELD_SEPARATOR}`
+      : INDEX_KEY_FIELD_SEPARATOR
+    const valuesRegex = indexDefinition
+      ? new RegExp(`^${indexPrefix}${fieldsPattern}(?<_filepath_>.+)`)
+      : new RegExp(`^${indexPrefix}(?<_filepath_>.+)`)
+    const itemFilter = makeFilter({ filterChain })
+
+    let count = 0
+    for await (const [key, value] of (
+      this.db as any
+    ) /*TODO why is typescript unhappy?*/
+      .iterator(query)) {
+      const matcher = valuesRegex.exec(key)
+      if (
+        !matcher ||
+        (indexDefinition &&
+          matcher.length !== indexDefinition.fields.length + 2)
+      ) {
+        continue
+      }
+      const filepath = matcher.groups['_filepath_']
+      if (
+        !itemFilter(
+          filterSuffixes
+            ? matcher.groups
+            : indexDefinition
+            ? await this.db.get(
+                `${defaultPrefix}${INDEX_KEY_FIELD_SEPARATOR}${filepath}`
+              )
+            : value
+        )
+      ) {
+        continue
+      }
+
+      count++
+    }
+
+    return count
+  }
+
   public async query(
     queryOptions: StoreQueryOptions
   ): Promise<StoreQueryResponse> {
@@ -67,6 +142,7 @@ export class LevelStore implements Store {
       collection,
       indexDefinitions,
       limit = 10,
+      offset = 0,
       ...query
     } = queryOptions
 
@@ -108,10 +184,16 @@ export class LevelStore implements Store {
       : new RegExp(`^${indexPrefix}(?<_filepath_>.+)`)
     const itemFilter = makeFilter({ filterChain })
 
+    let count = 0
     for await (const [key, value] of (
       this.db as any
     ) /*TODO why is typescript unhappy?*/
       .iterator(query)) {
+      if (count < offset) {
+        count++
+        continue
+      }
+
       const matcher = valuesRegex.exec(key)
       if (
         !matcher ||

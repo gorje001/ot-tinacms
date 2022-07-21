@@ -1443,6 +1443,14 @@ const listArgs = [
     name: 'sort',
     type: astBuilder.TYPES.String,
   }),
+  astBuilder.InputValueDefinition({
+    name: 'limit',
+    type: astBuilder.TYPES.Number,
+  }),
+  astBuilder.InputValueDefinition({
+    name: 'offset',
+    type: astBuilder.TYPES.Number,
+  }),
 ]
 
 const filterSelections = (arr: any[]) => {

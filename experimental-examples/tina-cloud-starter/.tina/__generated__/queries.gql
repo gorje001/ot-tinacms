@@ -15,13 +15,15 @@ query posts($relativePath: String!) {
   }
 }
 
-query postsConnection($before: String, $after: String, $first: Float, $last: Float, $sort: String, $filter: PostsFilter) {
+query postsConnection($before: String, $after: String, $first: Float, $last: Float, $sort: String, $limit: Float, $offset: Float, $filter: PostsFilter) {
   postsConnection(
     before: $before
     after: $after
     first: $first
     last: $last
     sort: $sort
+    limit: $limit
+    offset: $offset
     filter: $filter
   ) {
     totalCount
@@ -61,13 +63,15 @@ query global($relativePath: String!) {
   }
 }
 
-query globalConnection($before: String, $after: String, $first: Float, $last: Float, $sort: String, $filter: GlobalFilter) {
+query globalConnection($before: String, $after: String, $first: Float, $last: Float, $sort: String, $limit: Float, $offset: Float, $filter: GlobalFilter) {
   globalConnection(
     before: $before
     after: $after
     first: $first
     last: $last
     sort: $sort
+    limit: $limit
+    offset: $offset
     filter: $filter
   ) {
     totalCount
@@ -107,13 +111,15 @@ query authors($relativePath: String!) {
   }
 }
 
-query authorsConnection($before: String, $after: String, $first: Float, $last: Float, $sort: String, $filter: AuthorsFilter) {
+query authorsConnection($before: String, $after: String, $first: Float, $last: Float, $sort: String, $limit: Float, $offset: Float, $filter: AuthorsFilter) {
   authorsConnection(
     before: $before
     after: $after
     first: $first
     last: $last
     sort: $sort
+    limit: $limit
+    offset: $offset
     filter: $filter
   ) {
     totalCount
@@ -153,13 +159,15 @@ query pages($relativePath: String!) {
   }
 }
 
-query pagesConnection($before: String, $after: String, $first: Float, $last: Float, $sort: String, $filter: PagesFilter) {
+query pagesConnection($before: String, $after: String, $first: Float, $last: Float, $sort: String, $limit: Float, $offset: Float, $filter: PagesFilter) {
   pagesConnection(
     before: $before
     after: $after
     first: $first
     last: $last
     sort: $sort
+    limit: $limit
+    offset: $offset
     filter: $filter
   ) {
     totalCount

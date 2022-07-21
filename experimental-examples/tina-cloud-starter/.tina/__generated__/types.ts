@@ -116,6 +116,8 @@ export type QueryPostsConnectionArgs = {
   first?: InputMaybe<Scalars['Float']>;
   last?: InputMaybe<Scalars['Float']>;
   sort?: InputMaybe<Scalars['String']>;
+  limit?: InputMaybe<Scalars['Float']>;
+  offset?: InputMaybe<Scalars['Float']>;
   filter?: InputMaybe<PostsFilter>;
 };
 
@@ -131,6 +133,8 @@ export type QueryGlobalConnectionArgs = {
   first?: InputMaybe<Scalars['Float']>;
   last?: InputMaybe<Scalars['Float']>;
   sort?: InputMaybe<Scalars['String']>;
+  limit?: InputMaybe<Scalars['Float']>;
+  offset?: InputMaybe<Scalars['Float']>;
   filter?: InputMaybe<GlobalFilter>;
 };
 
@@ -146,6 +150,8 @@ export type QueryAuthorsConnectionArgs = {
   first?: InputMaybe<Scalars['Float']>;
   last?: InputMaybe<Scalars['Float']>;
   sort?: InputMaybe<Scalars['String']>;
+  limit?: InputMaybe<Scalars['Float']>;
+  offset?: InputMaybe<Scalars['Float']>;
   filter?: InputMaybe<AuthorsFilter>;
 };
 
@@ -161,6 +167,8 @@ export type QueryPagesConnectionArgs = {
   first?: InputMaybe<Scalars['Float']>;
   last?: InputMaybe<Scalars['Float']>;
   sort?: InputMaybe<Scalars['String']>;
+  limit?: InputMaybe<Scalars['Float']>;
+  offset?: InputMaybe<Scalars['Float']>;
   filter?: InputMaybe<PagesFilter>;
 };
 
@@ -204,6 +212,8 @@ export type CollectionDocumentsArgs = {
   first?: InputMaybe<Scalars['Float']>;
   last?: InputMaybe<Scalars['Float']>;
   sort?: InputMaybe<Scalars['String']>;
+  limit?: InputMaybe<Scalars['Float']>;
+  offset?: InputMaybe<Scalars['Float']>;
   filter?: InputMaybe<DocumentFilter>;
 };
 
@@ -936,6 +946,8 @@ export type PostsConnectionQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Float']>;
   last?: InputMaybe<Scalars['Float']>;
   sort?: InputMaybe<Scalars['String']>;
+  limit?: InputMaybe<Scalars['Float']>;
+  offset?: InputMaybe<Scalars['Float']>;
   filter?: InputMaybe<PostsFilter>;
 }>;
 
@@ -955,6 +967,8 @@ export type GlobalConnectionQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Float']>;
   last?: InputMaybe<Scalars['Float']>;
   sort?: InputMaybe<Scalars['String']>;
+  limit?: InputMaybe<Scalars['Float']>;
+  offset?: InputMaybe<Scalars['Float']>;
   filter?: InputMaybe<GlobalFilter>;
 }>;
 
@@ -974,6 +988,8 @@ export type AuthorsConnectionQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Float']>;
   last?: InputMaybe<Scalars['Float']>;
   sort?: InputMaybe<Scalars['String']>;
+  limit?: InputMaybe<Scalars['Float']>;
+  offset?: InputMaybe<Scalars['Float']>;
   filter?: InputMaybe<AuthorsFilter>;
 }>;
 
@@ -993,6 +1009,8 @@ export type PagesConnectionQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Float']>;
   last?: InputMaybe<Scalars['Float']>;
   sort?: InputMaybe<Scalars['String']>;
+  limit?: InputMaybe<Scalars['Float']>;
+  offset?: InputMaybe<Scalars['Float']>;
   filter?: InputMaybe<PagesFilter>;
 }>;
 
@@ -1198,13 +1216,15 @@ export const PostsDocument = gql`
 }
     ${PostsPartsFragmentDoc}`;
 export const PostsConnectionDocument = gql`
-    query postsConnection($before: String, $after: String, $first: Float, $last: Float, $sort: String, $filter: PostsFilter) {
+    query postsConnection($before: String, $after: String, $first: Float, $last: Float, $sort: String, $limit: Float, $offset: Float, $filter: PostsFilter) {
   postsConnection(
     before: $before
     after: $after
     first: $first
     last: $last
     sort: $sort
+    limit: $limit
+    offset: $offset
     filter: $filter
   ) {
     totalCount
@@ -1246,13 +1266,15 @@ export const GlobalDocument = gql`
 }
     ${GlobalPartsFragmentDoc}`;
 export const GlobalConnectionDocument = gql`
-    query globalConnection($before: String, $after: String, $first: Float, $last: Float, $sort: String, $filter: GlobalFilter) {
+    query globalConnection($before: String, $after: String, $first: Float, $last: Float, $sort: String, $limit: Float, $offset: Float, $filter: GlobalFilter) {
   globalConnection(
     before: $before
     after: $after
     first: $first
     last: $last
     sort: $sort
+    limit: $limit
+    offset: $offset
     filter: $filter
   ) {
     totalCount
@@ -1294,13 +1316,15 @@ export const AuthorsDocument = gql`
 }
     ${AuthorsPartsFragmentDoc}`;
 export const AuthorsConnectionDocument = gql`
-    query authorsConnection($before: String, $after: String, $first: Float, $last: Float, $sort: String, $filter: AuthorsFilter) {
+    query authorsConnection($before: String, $after: String, $first: Float, $last: Float, $sort: String, $limit: Float, $offset: Float, $filter: AuthorsFilter) {
   authorsConnection(
     before: $before
     after: $after
     first: $first
     last: $last
     sort: $sort
+    limit: $limit
+    offset: $offset
     filter: $filter
   ) {
     totalCount
@@ -1342,13 +1366,15 @@ export const PagesDocument = gql`
 }
     ${PagesPartsFragmentDoc}`;
 export const PagesConnectionDocument = gql`
-    query pagesConnection($before: String, $after: String, $first: Float, $last: Float, $sort: String, $filter: PagesFilter) {
+    query pagesConnection($before: String, $after: String, $first: Float, $last: Float, $sort: String, $limit: Float, $offset: Float, $filter: PagesFilter) {
   pagesConnection(
     before: $before
     after: $after
     first: $first
     last: $last
     sort: $sort
+    limit: $limit
+    offset: $offset
     filter: $filter
   ) {
     totalCount

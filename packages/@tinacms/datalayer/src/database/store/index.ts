@@ -73,6 +73,8 @@ export type StoreQueryOptions = {
   reverse?: boolean
   /* limits result set */
   limit?: number
+  /* offset into result set */
+  offset?: number
 }
 
 export type PageInfo = {
@@ -122,6 +124,12 @@ export interface Store {
    * @returns the results of the query
    */
   query(queryOptions: StoreQueryOptions): Promise<StoreQueryResponse>
+
+  /**
+   * Get item count for a query
+   * @param queryOptions
+   */
+  count(queryOptions: StoreQueryOptions): Promise<number>
 
   /**
    * In this context, seeding is the act of putting records and indexing data into an ephemeral
