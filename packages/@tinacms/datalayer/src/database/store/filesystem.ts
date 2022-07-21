@@ -26,6 +26,9 @@ export class FilesystemStore implements Store {
   constructor({ rootPath }: { rootPath?: string }) {
     this.rootPath = rootPath || ''
   }
+  public count(queryOptions: StoreQueryOptions): Promise<number> {
+    throw new Error(`Unable to perform count for Filesystem store`)
+  }
   public async query(
     _queryOptions: StoreQueryOptions
   ): Promise<StoreQueryResponse> {
