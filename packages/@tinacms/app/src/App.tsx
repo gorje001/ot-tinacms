@@ -1,21 +1,19 @@
-import MyConfig from './config'
-import React, { useState } from 'react'
-import './App.css'
+// @ts-nocheck
+import { Routes, Route } from 'react-router-dom'
+import Page from './components/pages/landing-page'
+import { App } from './admin'
 
-function App() {
-  const [count, setCount] = useState(0)
+const Meh = () => {
+  return <div>hi</div>
+}
 
+function TinaApp() {
   return (
-    <div className="App">
-      <h1>Vite + React + Tina</h1>
-      {/* {JSON.stringify(myConfig, null, 2)} */}
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          <MyConfig />
-        </button>
-      </div>
-    </div>
+    <>
+      <Route path="/*" element={<Page />} />
+      <Route path="admin" element={<App />} />
+    </>
   )
 }
 
-export default App
+export default TinaApp

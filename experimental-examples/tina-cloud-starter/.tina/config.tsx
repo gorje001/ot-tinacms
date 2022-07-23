@@ -1,7 +1,11 @@
 import React from "react";
 
 function Meh() {
-  return <div style={{ color: "white" }}>Hi!</div>;
+  return (
+    <div className="bg-blue-200">
+      <button>Hi</button>
+    </div>
+  );
 }
 
 export default Meh;
