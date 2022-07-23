@@ -1,6 +1,5 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-// import App from './App'
 import { DataHashRouter, Route } from 'react-router-dom'
 import Page from './components/pages/landing-page'
 import List from './admin/list'
@@ -11,7 +10,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <div className="tina-tailwind">
       <DataHashRouter>
-        <Route path="/" element={<List />} />
+        <Route path="/" element={<App />} />
         <Route path="admin" element={<App />} />
       </DataHashRouter>
     </div>
