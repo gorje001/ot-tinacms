@@ -103,7 +103,7 @@
     "final-form-set-field-data": "^1.0.2",
     "is-hotkey": "^0.2.0",
     "lodash.get": "^4.4.2",
-    "mime-types": "^2.1.24",
+    "mime": "^3.0.0",
     "moment": ">=2 <=3",
     "prop-types": "15.7.2",
     "react-beautiful-dnd": "^13.1.0",
