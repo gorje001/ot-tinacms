@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 // Seems like this is no longer necessary
 import react from '@vitejs/plugin-react'
 import path from 'path'
