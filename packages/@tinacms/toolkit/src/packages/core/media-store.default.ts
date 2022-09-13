@@ -98,6 +98,8 @@ export class TinaMediaStore implements MediaStore {
 
   private async persist_cloud(media: MediaUploadOptions[]): Promise<Media[]> {
     const newFiles: Media[] = []
+    const isAuthenticated = await this.isAuthenticated()
+    console.log('!!! persist_cloud authenticated:', isAuthenticated)
 
     if (await this.isAuthenticated()) {
       for (const item of media) {
@@ -106,17 +108,21 @@ export class TinaMediaStore implements MediaStore {
             ? `${item.directory}/${item.file.name}`
             : item.file.name
         }`
+        console.log('!!! generating upload url for', { item, path })
         const res = await this.api.fetchWithToken(
           `${this.url}/upload_url/${path}`,
           { method: 'GET' }
         )
 
-        const { signedUrl } = await res.json()
-        if (!signedUrl) {
+        const resJson = await res.json()
+        console.log('!!! json response', resJson)
+        if (!resJson.signedUrl) {
+          console.log('!!! missing signedUrl')
           throw new Error('Unexpected error generating upload url')
         }
 
-        const uploadRes = await this.fetchFunction(signedUrl, {
+        console.log('!!! starting put request')
+        const uploadRes = await this.fetchFunction(resJson.signedUrl, {
           method: 'PUT',
           body: item.file,
           headers: {
@@ -125,9 +131,11 @@ export class TinaMediaStore implements MediaStore {
             'Content-Length': String(item.file.size),
           },
         })
+        console.log('!!! finished put request')
 
         if (!uploadRes.ok) {
           const xmlRes = await uploadRes.text()
+          console.log('!!! xmlRes', xmlRes)
           const matches = s3ErrorRegex.exec(xmlRes)
           console.error(xmlRes)
           if (!matches) {
